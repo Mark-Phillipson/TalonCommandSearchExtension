@@ -206,6 +206,14 @@
                     scopeSelect.value = message.scope.toString();
                 }
                 break;
+                
+            case 'error':
+                console.error('[Webview] Error from extension:', message.message);
+                const resultsDiv = document.getElementById('results');
+                if (resultsDiv) {
+                    resultsDiv.innerHTML = `<p class="error-message">⚠️ ${message.message}</p>`;
+                }
+                break;
         }
     });
 

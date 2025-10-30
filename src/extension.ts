@@ -83,17 +83,29 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Auto-import on startup if enabled
     const config = vscode.workspace.getConfiguration('talonSearch');
+    console.log('Talon config:', {
+        enableAutoIndexing: config.get<boolean>('enableAutoIndexing'),
+        userFolderPath: config.get<string>('userFolderPath')
+    });
+    
     if (config.get<boolean>('enableAutoIndexing')) {
         let talonPath = config.get<string>('userFolderPath');
         if (!talonPath) {
             talonPath = await autoDetectTalonPath();
+            console.log('Auto-detected Talon path:', talonPath);
         }
         if (talonPath && fs.existsSync(talonPath)) {
+            console.log('Starting background import from:', talonPath);
             // Import in background without blocking activation
             importTalonFiles(context, talonPath).catch(err => {
                 console.error('Background import failed:', err);
+                vscode.window.showErrorMessage(`Failed to import Talon files: ${err.message}`);
             });
+        } else {
+            console.log('Talon path not found or does not exist:', talonPath);
         }
+    } else {
+        console.log('Auto-indexing is disabled');
     }
 }
 
@@ -131,6 +143,17 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
             async (message) => {
                 switch (message.command) {
                     case 'search':
+                        if (!db) {
+                            searchPanel?.webview.postMessage({
+                                command: 'searchResults',
+                                results: []
+                            });
+                            searchPanel?.webview.postMessage({
+                                command: 'error',
+                                message: 'Database not initialized. Please reload the window.'
+                            });
+                            break;
+                        }
                         const results = db.searchCommands(
                             message.searchTerm || '',
                             message.searchScope || 2,
@@ -145,6 +168,18 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                         });
                         break;
                     case 'getStats':
+                        if (!db) {
+                            searchPanel?.webview.postMessage({
+                                command: 'stats',
+                                totalCommands: 0,
+                                filters: { applications: [], modes: [], repositories: [], operatingSystems: [] }
+                            });
+                            searchPanel?.webview.postMessage({
+                                command: 'error',
+                                message: 'Database not initialized. Please reload the window.'
+                            });
+                            break;
+                        }
                         const count = db.getCommandCount();
                         const filters = db.getFilterValues();
                         searchPanel?.webview.postMessage({
@@ -154,6 +189,13 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                         });
                         break;
                     case 'clearDatabase':
+                        if (!db) {
+                            searchPanel?.webview.postMessage({
+                                command: 'error',
+                                message: 'Database not initialized. Please reload the window.'
+                            });
+                            break;
+                        }
                         db.clearAllCommands();
                         searchPanel?.webview.postMessage({
                             command: 'stats',
@@ -189,13 +231,25 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
     searchPanel.reveal();
     
     // Send initial data to webview
-    const count = db.getCommandCount();
-    const filters = db.getFilterValues();
-    searchPanel.webview.postMessage({
-        command: 'stats',
-        totalCommands: count,
-        filters: filters
-    });
+    if (db) {
+        const count = db.getCommandCount();
+        const filters = db.getFilterValues();
+        searchPanel.webview.postMessage({
+            command: 'stats',
+            totalCommands: count,
+            filters: filters
+        });
+    } else {
+        searchPanel.webview.postMessage({
+            command: 'stats',
+            totalCommands: 0,
+            filters: { applications: [], modes: [], repositories: [], operatingSystems: [] }
+        });
+        searchPanel.webview.postMessage({
+            command: 'error',
+            message: 'Database not initialized. Please reload the window.'
+        });
+    }
     searchPanel.webview.postMessage({ 
         command: 'setSearchScope', 
         scope: searchScope 
@@ -203,6 +257,7 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
 }
 
 async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: string) {
+    console.log('importTalonFiles called with rootFolder:', rootFolder);
     return vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         title: "Importing Talon files",
@@ -211,6 +266,7 @@ async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: st
         progress.report({ increment: 0, message: "Scanning files..." });
 
         const files = await getTalonFiles(rootFolder);
+        console.log(`Found ${files.length} .talon files`);
         
         progress.report({ increment: 30, message: `Found ${files.length} .talon files` });
 
@@ -241,9 +297,11 @@ async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: st
         progress.report({ increment: 80, message: `Saving ${allCommands.length} commands to database...` });
 
         // Insert into SQLite
+        console.log(`Inserting ${allCommands.length} commands into database`);
         db.insertCommandsBatch(allCommands);
 
         const totalCount = db.getCommandCount();
+        console.log(`Import complete. Total commands in database: ${totalCount}`);
         progress.report({ increment: 100, message: "Import complete" });
 
         vscode.window.showInformationMessage(`Imported ${allCommands.length} commands. Total in database: ${totalCount}`);

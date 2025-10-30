@@ -152,3 +152,14 @@ h1 {
     padding: 40px;
     font-size: 14px;
 }
+
+.error-message {
+    color: var(--vscode-errorForeground);
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
+    background: var(--vscode-inputValidation-errorBackground);
+    border: 1px solid var(--vscode-inputValidation-errorBorder);
+    border-radius: 4px;
+    margin: 20px 0;
+}
