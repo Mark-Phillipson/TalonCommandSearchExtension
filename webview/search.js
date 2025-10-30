@@ -12,9 +12,31 @@
     let totalLists = 0;
     let listNames = [];
     let currentTab = 'commands';
+    let searchTimeout = null;
+    let isSearching = false;
+    let lastSearchParams = null;
 
     // Request search from extension host (SQLite backend)
     function performSearch() {
+        // Clear any pending search
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+            searchTimeout = null;
+        }
+        
+        // Debounce search requests
+        searchTimeout = setTimeout(() => {
+            performSearchImmediate();
+        }, 150);
+    }
+    
+    function performSearchImmediate() {
+        // Prevent multiple concurrent searches
+        if (isSearching) {
+            console.log('[Search] Search already in progress, skipping');
+            return;
+        }
+        
         const searchTerm = document.getElementById('searchInput')?.value.trim() || '';
         const scopeElement = document.getElementById('searchScope');
         const searchScope = scopeElement ? parseInt(scopeElement.value) : 2;
@@ -22,16 +44,30 @@
         const mode = document.getElementById('filterMode')?.value || undefined;
         const repository = document.getElementById('filterRepository')?.value || undefined;
         
-        console.log('[Search] Performing search:', { searchTerm, searchScope, scopeValue: scopeElement?.value, application, mode, repository });
-        
-        vscode.postMessage({
-            command: 'search',
+        // Create search parameters object
+        const searchParams = {
             searchTerm: searchTerm,
             searchScope: searchScope,
             application: application === '' ? undefined : application,
             mode: mode === '' ? undefined : mode,
             repository: repository === '' ? undefined : repository,
             maxResults: 500
+        };
+        
+        // Check if this is the same search as the last one
+        if (lastSearchParams && JSON.stringify(searchParams) === JSON.stringify(lastSearchParams)) {
+            console.log('[Search] Same search parameters as last search, skipping');
+            return;
+        }
+        
+        lastSearchParams = { ...searchParams };
+        isSearching = true;
+        
+        console.log('[Search] Performing search:', { searchTerm, searchScope, scopeValue: scopeElement?.value, application, mode, repository });
+        
+        vscode.postMessage({
+            command: 'search',
+            ...searchParams
         });
     }
 
@@ -138,6 +174,9 @@
 
     // Display results in UI
     function displayResults(results) {
+        // Mark search as complete
+        isSearching = false;
+        
         const resultsDiv = document.getElementById('results');
         if (!resultsDiv) return;
         
@@ -612,7 +651,12 @@
         switch (message.command) {
             case 'searchResults':
                 console.log('[Webview] Displaying', message.results.length, 'results');
-                displayResults(message.results);
+                if (Array.isArray(message.results)) {
+                    displayResults(message.results);
+                } else {
+                    console.error('[Webview] Invalid search results format:', message.results);
+                    isSearching = false;
+                }
                 break;
                 
             case 'stats':

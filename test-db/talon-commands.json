@@ -1,0 +1,475 @@
+{
+  "commands": [
+    {
+      "command": "save file",
+      "script": "key(ctrl-s)",
+      "application": "code",
+      "filePath": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\vscode.talon",
+      "createdAt": "2025-10-30T17:22:34.828Z",
+      "id": 1
+    },
+    {
+      "command": "open file",
+      "script": "key(ctrl-o)",
+      "application": "code",
+      "filePath": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\vscode.talon",
+      "createdAt": "2025-10-30T17:22:34.829Z",
+      "id": 2
+    },
+    {
+      "command": "find",
+      "script": "key(ctrl-f)",
+      "application": "code",
+      "filePath": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\vscode.talon",
+      "createdAt": "2025-10-30T17:22:34.829Z",
+      "id": 3
+    },
+    {
+      "command": "replace",
+      "script": "key(ctrl-h)",
+      "application": "code",
+      "filePath": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\vscode.talon",
+      "createdAt": "2025-10-30T17:22:34.829Z",
+      "id": 4
+    },
+    {
+      "command": "go to line",
+      "script": "key(ctrl-g)",
+      "application": "code",
+      "filePath": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\vscode.talon",
+      "createdAt": "2025-10-30T17:22:34.829Z",
+      "id": 5
+    },
+    {
+      "command": "insert {user.emoji}",
+      "script": "\"{user.emoji}\"",
+      "application": "code",
+      "filePath": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\vscode.talon",
+      "createdAt": "2025-10-30T17:22:34.829Z",
+      "id": 6
+    },
+    {
+      "command": "press {user.keys}",
+      "script": "key({user.keys})",
+      "application": "code",
+      "filePath": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\vscode.talon",
+      "createdAt": "2025-10-30T17:22:34.829Z",
+      "id": 7
+    },
+    {
+      "command": "say {user.snippets}",
+      "script": "insert(user.snippets)",
+      "application": "code",
+      "filePath": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\vscode.talon",
+      "createdAt": "2025-10-30T17:22:34.829Z",
+      "id": 8
+    },
+    {
+      "command": "game {user.arrow_key}",
+      "script": "key({user.arrow_key})",
+      "application": "game",
+      "filePath": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\game.talon",
+      "createdAt": "2025-10-30T17:22:34.829Z",
+      "id": 9
+    },
+    {
+      "command": "move {user.arrow_key}",
+      "script": "key({user.arrow_key})\nsleep(100ms)\nkey({user.arrow_key})",
+      "application": "game",
+      "filePath": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\game.talon",
+      "createdAt": "2025-10-30T17:22:34.829Z",
+      "id": 10
+    }
+  ],
+  "lists": [
+    {
+      "listName": "user.emoji",
+      "spokenForm": "angry",
+      "listValue": "😠",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 1,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "sad",
+      "listValue": "😢",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 2,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "happy",
+      "listValue": "😊",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 3,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "laughing",
+      "listValue": "😂",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 4,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "heart",
+      "listValue": "❤️",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 5,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "thumbs up",
+      "listValue": "👍",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 6,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "thumbs down",
+      "listValue": "👎",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 7,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "clapping",
+      "listValue": "👏",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 8,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "dancing",
+      "listValue": "💃",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 9,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "broken heart",
+      "listValue": "💔",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 10,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "poop",
+      "listValue": "💩",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 11,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "thinking",
+      "listValue": "🤔",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 12,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "hugging",
+      "listValue": "🤗",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 13,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "roll",
+      "listValue": "🙄",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 14,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "star eyes",
+      "listValue": "🤩",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 15,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "shushing",
+      "listValue": "🤫",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 16,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "shrugging",
+      "listValue": "🤷",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 17,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "writing",
+      "listValue": "✍️",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 18,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "party",
+      "listValue": "🎉",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 19,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.emoji",
+      "spokenForm": "eyes",
+      "listValue": "👀",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\emoji.talon-list",
+      "id": 20,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "left",
+      "listValue": "left",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 21,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "right",
+      "listValue": "right",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 22,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "up",
+      "listValue": "up",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 23,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "down",
+      "listValue": "down",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 24,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "page up",
+      "listValue": "pageup",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 25,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "page down",
+      "listValue": "pagedown",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 26,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "home",
+      "listValue": "home",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 27,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "end",
+      "listValue": "end",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 28,
+      "createdAt": "2025-10-30T17:22:34.830Z",
+      "importedAt": "2025-10-30T17:22:34.830Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "tab",
+      "listValue": "tab",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 29,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "enter",
+      "listValue": "enter",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 30,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "escape",
+      "listValue": "escape",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 31,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "backspace",
+      "listValue": "backspace",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 32,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "delete",
+      "listValue": "delete",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 33,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.keys",
+      "spokenForm": "space",
+      "listValue": "space",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\keys.talon-list",
+      "id": 34,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.snippets",
+      "spokenForm": "hello world",
+      "listValue": "print(\"Hello, World!\")",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\snippets.talon-list",
+      "id": 35,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.snippets",
+      "spokenForm": "goodbye",
+      "listValue": "print(\"Goodbye!\")",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\snippets.talon-list",
+      "id": 36,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.snippets",
+      "spokenForm": "debug message",
+      "listValue": "console.log(\"Debug message\")",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\snippets.talon-list",
+      "id": 37,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.snippets",
+      "spokenForm": "error message",
+      "listValue": "console.error(\"Error occurred\")",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\snippets.talon-list",
+      "id": 38,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.snippets",
+      "spokenForm": "warning",
+      "listValue": "console.warn(\"Warning message\")",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\snippets.talon-list",
+      "id": 39,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.arrow_key",
+      "spokenForm": "left",
+      "listValue": "left",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\arrow_key.talon-list",
+      "id": 40,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.arrow_key",
+      "spokenForm": "right",
+      "listValue": "right",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\arrow_key.talon-list",
+      "id": 41,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.arrow_key",
+      "spokenForm": "up",
+      "listValue": "up",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\arrow_key.talon-list",
+      "id": 42,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    },
+    {
+      "listName": "user.arrow_key",
+      "spokenForm": "down",
+      "listValue": "down",
+      "sourceFile": "C:\\Users\\MPhil\\source\\repos\\TalonCommandSearchExtension\\test-data\\user\\arrow_key.talon-list",
+      "id": 43,
+      "createdAt": "2025-10-30T17:22:34.831Z",
+      "importedAt": "2025-10-30T17:22:34.831Z"
+    }
+  ],
+  "nextId": 11,
+  "nextListId": 44
+}

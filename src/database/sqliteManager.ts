@@ -114,6 +114,13 @@ export class SqliteManager {
         maxResults: number = 500
     ): TalonVoiceCommand[] {
         console.log(`[SqliteManager] Search called with: term="${searchTerm}", scope=${searchScope}, app="${application}", mode="${mode}", repo="${repository}"`);
+        console.log(`[SqliteManager] Database has ${this.commands.length} commands and ${this.lists.length} list items`);
+        
+        // Debug: Check for commands with list placeholders
+        const commandsWithLists = this.commands.filter(cmd => cmd.command.includes('{'));
+        console.log(`[SqliteManager] Found ${commandsWithLists.length} commands with list placeholders:`, 
+            commandsWithLists.slice(0, 10).map(cmd => cmd.command)
+        );
         
         let results = [...this.commands];
 
@@ -138,7 +145,8 @@ export class SqliteManager {
                 console.log(`[SqliteManager] Using CommandNamesOnly search scope`);
                 const beforeCount = results.length;
                 results = results.filter(cmd => 
-                    cmd.command.toLowerCase().includes(term)
+                    cmd.command.toLowerCase().includes(term) ||
+                    this.commandMatchesListItem(cmd.command, term)
                 );
                 console.log(`[SqliteManager] CommandNamesOnly: Filtered from ${beforeCount} to ${results.length} results`);
                 
@@ -155,14 +163,27 @@ export class SqliteManager {
                     cmd.script.toLowerCase().includes(term)
                 );
             } else {
-                // All - search in command, script, and application
+                // All - search in command, script, application, and list items
                 console.log(`[SqliteManager] Using All search scope`);
+                console.log(`[SqliteManager] Sample commands to search through:`, 
+                    results.slice(0, 5).map(cmd => ({ command: cmd.command, app: cmd.application }))
+                );
+                
+                // Test our list matching on a few commands with list placeholders
+                const testCommands = results.filter(cmd => cmd.command.includes('{')).slice(0, 3);
+                console.log(`[SqliteManager] Testing list matching on sample commands:`, testCommands.map(cmd => cmd.command));
+                testCommands.forEach(cmd => {
+                    const matches = this.commandMatchesListItem(cmd.command, term);
+                    console.log(`[SqliteManager] Command "${cmd.command}" matches search "${term}": ${matches}`);
+                });
+                
                 results = results.filter(cmd => 
                     cmd.command.toLowerCase().includes(term) ||
                     cmd.script.toLowerCase().includes(term) ||
                     (cmd.application && cmd.application.toLowerCase().includes(term)) ||
                     (cmd.title && cmd.title.toLowerCase().includes(term)) ||
-                    (cmd.tags && cmd.tags.toLowerCase().includes(term))
+                    (cmd.tags && cmd.tags.toLowerCase().includes(term)) ||
+                    this.commandMatchesListItem(cmd.command, term)
                 );
             }
         }
@@ -311,5 +332,100 @@ export class SqliteManager {
 
     public close(): void {
         // Nothing to close for JSON-based storage
+    }
+
+    /**
+     * Check if a command that contains list placeholders (e.g., {user.emoji} or <user.arrow_key>) 
+     * matches a search term that could be a list item value.
+     * For example, searching for "left" should match "game <user.arrow_key>" 
+     * if "left" is in the user.arrow_key list.
+     * Also handles multi-word searches like "insert happy" by checking individual words.
+     */
+    private commandMatchesListItem(command: string, searchTerm: string): boolean {
+        // Find all list placeholders in the command - both {user.emoji} and <user.arrow_key> formats
+        const listPlaceholderRegex = /[{<]([^}>]+)[}>]/g;
+        const matches = command.match(listPlaceholderRegex);
+        
+        console.log(`[commandMatchesListItem] Checking command: "${command}" for search: "${searchTerm}"`);
+        console.log(`[commandMatchesListItem] Found placeholders:`, matches);
+        
+        if (!matches) {
+            return false;
+        }
+
+        // Extract list names from placeholders (e.g., "user.arrow_key" from "<user.arrow_key>" or "{user.emoji}")
+        const extractedListNames = matches.map(match => match.slice(1, -1)); // Remove brackets/braces
+        
+        // Get all actual list names from the database
+        const actualListNames = [...new Set(this.lists.map(item => item.listName))];
+        console.log(`[commandMatchesListItem] Available list names in database:`, actualListNames.slice(0, 5), `... (${actualListNames.length} total)`);
+        
+        // Map extracted list names to actual list names in the database
+        // This handles cases where the database has "user.community/core/keys/arrow_key" 
+        // but the command has "<user.arrow_key>"
+        const listNames: string[] = [];
+        
+        for (const extractedName of extractedListNames) {
+            // First try exact match
+            if (actualListNames.includes(extractedName)) {
+                listNames.push(extractedName);
+                continue;
+            }
+            
+            // Extract the base name from the extracted name (e.g., "arrow_key" from "user.arrow_key")
+            const baseName = extractedName.split('.').pop();
+            if (!baseName) continue;
+            
+            // Find lists that end with this base name
+            // e.g., "arrow_key" should match "user.community/core/keys/arrow_key"
+            const matchingLists = actualListNames.filter(actualName => {
+                const actualBaseName = actualName.split('/').pop()?.split('.').pop();
+                return actualBaseName === baseName;
+            });
+            
+            if (matchingLists.length > 0) {
+                console.log(`[commandMatchesListItem] Found matching list: "${extractedName}" -> "${matchingLists[0]}"`);
+                listNames.push(matchingLists[0]);
+            } else {
+                console.log(`[commandMatchesListItem] No matching list found for: "${extractedName}" (base: "${baseName}")`);
+            }
+        }
+        
+        console.log(`[commandMatchesListItem] List names to check (filtered):`, listNames);
+        
+        if (listNames.length === 0) {
+            return false;
+        }
+        
+        // Split search term into individual words to handle multi-word searches
+        const searchWords = searchTerm.toLowerCase().split(/\s+/).filter(word => word.length > 0);
+        
+        // Check if any word in the search term matches any spoken form or list value in the referenced lists
+        for (const listName of listNames) {
+            const listItems = this.lists.filter(item => item.listName === listName);
+            console.log(`[commandMatchesListItem] Found ${listItems.length} items for list "${listName}"`);
+            if (listItems.length > 0) {
+                console.log(`[commandMatchesListItem] Sample items:`, listItems.slice(0, 3).map(item => `${item.spokenForm} -> ${item.listValue}`));
+            }
+            
+            for (const item of listItems) {
+                const spokenForm = item.spokenForm.toLowerCase();
+                const listValue = item.listValue.toLowerCase();
+                
+                // Check if any search word matches the spoken form or is contained in the list value
+                for (const word of searchWords) {
+                    if (spokenForm === word || 
+                        spokenForm.includes(word) ||
+                        listValue.includes(word) ||
+                        // Handle multi-word spoken forms (e.g., "hello world" matches "hello world")
+                        (spokenForm.includes(' ') && searchTerm === spokenForm)) {
+                        console.log(`[SqliteManager] Found list match: "${word}" (from "${searchTerm}") matches list item "${item.spokenForm}" -> "${item.listValue}" in list "${listName}"`);
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
     }
 }

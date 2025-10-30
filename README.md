@@ -9,9 +9,14 @@
 - **🎛️ Advanced Filtering**: Filter by application, mode, repository with real-time results
 - **📊 Repository Breakdown**: See command distribution across your repositories (community, personal, etc.)
 - **🎯 Multiple Search Scopes**: 
-  - 🎪 Command Names Only (exact matches)
+  - 🎪 Command Names Only (exact matches + intelligent list matching)
   - 📝 Scripts Only (code content search)
-  - 🌐 All (comprehensive search across everything)
+  - 🌐 All (comprehensive search across everything + list matching)
+- **🧠 Intelligent List Matching**: Search by list values to find commands that use them
+  - 🔍 Search "left" → finds `game <user.arrow_key>` (because "left" is in the arrow_key list)
+  - 🎭 Search "happy" → finds `insert <user.emoji>` (because "happy" is in the emoji list)
+  - 🔗 Automatically maps command placeholders to actual Talon lists
+  - ✨ Works with complex list naming structures and repository paths
 - **🤖 Auto-Detection**: Automatically finds your Talon user folder on Windows/Mac/Linux
 - **📂 File Integration**: Click any result to open the source .talon file instantly
 - **⌨️ Keyboard Shortcuts**: `Ctrl+Shift+T` (Windows/Linux) or `Cmd+Shift+T` (Mac)
@@ -33,6 +38,34 @@
 - ❌ **IndexedDB**: Too slow for large datasets (cursor-based iteration)
 - ✅ **JSON + In-Memory**: Perfect balance of speed, simplicity, and reliability
 
+## 🧠 How List Matching Works
+
+The **Intelligent List Matching** feature revolutionizes command discovery by letting you search for the values that commands accept, not just their names.
+
+### ✨ Examples
+
+| Search Term | Finds Commands | Why? |
+|-------------|---------------|------|
+| `"left"` | `game <user.arrow_key>` | "left" exists in the arrow_key list |
+| `"chrome"` | `focus <user.running_applications>` | "chrome" is in the applications list |
+| `"happy"` | `insert <user.emoji>` | "happy" is an emoji in the emoji list |
+| `"enter"` | `press <user.keys>` | "enter" is in the keys list |
+
+### 🔧 Technical Details
+
+1. **🔍 Placeholder Detection**: Finds placeholders like `<user.arrow_key>` and `{user.emoji}` in commands
+2. **🗺️ Smart Mapping**: Maps simplified names (`user.arrow_key`) to full database paths (`user.community/core/keys/arrow_key`)
+3. **📊 List Lookup**: Searches through actual Talon list files (.talon-list) for matching values
+4. **✅ Match Return**: Returns the command as a match if your search term exists in any referenced list
+
+### 🎯 Search Scopes That Support List Matching
+
+- **Command Names Only**: ✅ Includes list matching
+- **Scripts Only**: ❌ No list matching (searches code content only)  
+- **All**: ✅ Includes list matching + everything else
+
+This feature makes it incredibly easy to discover commands when you know what you want to do but don't know the exact command name!
+
 ## 🚀 Quick Start
 
 1. **📦 Install the extension**
@@ -40,6 +73,7 @@
 3. **🔄 Run**: `Talon: Refresh Index` (first time only - imports your commands)
 4. **🔍 Search**: `Talon: Search Commands` or use `Ctrl+Shift+T`
 5. **📊 Enjoy**: See your command breakdown and start searching instantly!
+6. **🧠 Try List Matching**: Search for values like "left", "chrome", or "happy" to see the magic!
 
 ## ⚙️ Configuration
 
@@ -96,11 +130,20 @@ npm run watch
 
 ## 🆕 Recent Updates (Latest)
 
+### 🧠 Revolutionary List Matching (NEW!)
+- **🎯 Intelligent List Value Search**: Find commands by searching for the values they accept
+- **🔍 Smart Placeholder Mapping**: Automatically maps `<user.arrow_key>` to actual lists like `user.community/core/keys/arrow_key`  
+- **✨ Enhanced Command Discovery**: Search "left" to find all commands that use arrow keys
+- **🚫 No False Positives**: Only matches actual Talon lists, not code captures
+- **🏃‍♂️ Performance Optimized**: Debounced search with race condition prevention
+- **📊 Works Across All Scopes**: List matching available in Command Names Only and All search scopes
+
 ### 🎨 Enhanced UI & User Experience
 - **CSS Grid Layout**: Modern responsive design with automatic 3-column layout
 - **Improved Results Display**: Cards now use optimal grid spacing for better readability
 - **Interactive Repository Stats**: Click on any repository in the breakdown to instantly filter results
 - **Visual Filter Feedback**: Selected repositories are visually highlighted in the stats
+- **🔄 Stable Results**: Fixed issue where search results would sometimes disappear
 
 ### 🛠️ Database Management Tools
 - **Check Database**: New toolbar button to inspect database status and location
@@ -137,7 +180,7 @@ npm run watch
 - [x] **✅ Folder Management** - Custom folder selection and import workflows
 - [x] **✅ Enhanced Filtering** - Clickable repository stats and dynamic filtering
 - [x] **✅ Publishing Ready** - Complete publishing guide and marketplace preparation
-- [ ] **🔮 List Parsing** - Support for Talon list files (.talon-list)
+- [x] **✅ List Parsing & Matching** - Full support for Talon list files (.talon-list) with intelligent command matching
 - [ ] **🌳 TreeView** - Hierarchical browsing of results
 - [ ] **🧠 Semantic Search** - AI-powered command discovery
 - [ ] **👀 File Watcher** - Auto-refresh when .talon files change
