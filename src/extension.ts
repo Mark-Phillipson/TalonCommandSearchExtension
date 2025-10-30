@@ -434,6 +434,18 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
             </select>
         </div>
 
+        <div class="filters">
+            <select id="filterApplication">
+                <option value="">All Applications</option>
+            </select>
+            <select id="filterMode">
+                <option value="">All Modes</option>
+            </select>
+            <select id="filterRepository">
+                <option value="">All Repositories</option>
+            </select>
+        </div>
+
         <div id="stats" class="stats"></div>
         
         <div id="results" class="results"></div>

@@ -67,7 +67,7 @@
             const footer = document.createElement('div');
             footer.className = 'command-footer';
             footer.innerHTML = `
-                ${cmd.repository ? `<span>📁 ${escapeHtml(cmd.repository)}</span>` : ''}
+                ${cmd.repository ? `<span class="clickable-repo-label" data-repo="${escapeHtml(cmd.repository)}" title="Click to filter by ${escapeHtml(cmd.repository)}">📁 ${escapeHtml(cmd.repository)}</span>` : ''}
                 ${cmd.mode ? `<span>🎯 ${escapeHtml(cmd.mode)}</span>` : ''}
             `;
             
@@ -75,9 +75,23 @@
             card.appendChild(script);
             card.appendChild(footer);
             
-            card.addEventListener('click', () => {
-                vscode.postMessage({ command: 'openFile', filePath: cmd.filePath });
+            // Add click handler for opening file (but prevent on repository clicks)
+            card.addEventListener('click', (e) => {
+                // Don't open file if clicking on repository label
+                if (!e.target.classList.contains('clickable-repo-label')) {
+                    vscode.postMessage({ command: 'openFile', filePath: cmd.filePath });
+                }
             });
+            
+            // Add click handler for repository labels in footer
+            const repoLabel = footer.querySelector('.clickable-repo-label');
+            if (repoLabel) {
+                repoLabel.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent card click
+                    const repoValue = repoLabel.getAttribute('data-repo');
+                    filterByRepository(repoValue);
+                });
+            }
             
             resultsDiv.appendChild(card);
         });
@@ -87,11 +101,21 @@
         totalCommands = total;
         const statsDiv = document.getElementById('stats');
         if (statsDiv) {
+            const currentRepoFilter = document.getElementById('filterRepository')?.value || '';
             let html = `<div class="stats-total">Total commands: ${total}</div>`;
+            
+            // Show active filter if any
+            if (currentRepoFilter) {
+                const filterName = currentRepoFilter || 'No Repository';
+                html += `<div class="active-filter">
+                    📌 Filtered by: <strong>${escapeHtml(filterName)}</strong>
+                    <span class="clear-filter" onclick="clearRepositoryFilter()" title="Clear filter">✖</span>
+                </div>`;
+            }
             
             if (repositoryBreakdown && Object.keys(repositoryBreakdown).length > 0) {
                 html += '<div class="stats-breakdown">';
-                html += '<h4>Commands by Repository:</h4>';
+                html += '<h4 title="Click on any repository below to filter results">Commands by Repository (click to filter):</h4>';
                 html += '<div class="repo-stats-container">';
                 
                 // Sort repositories by command count (descending)
@@ -100,7 +124,8 @@
                 
                 sortedRepos.forEach(([repo, count]) => {
                     const repoName = repo || 'No Repository';
-                    html += `<div class="repo-stat">
+                    const repoValue = repo || '';
+                    html += `<div class="repo-stat clickable-repo" data-repo="${escapeHtml(repoValue)}" title="Click to filter by ${escapeHtml(repoName)}">
                         <span class="repo-name">${escapeHtml(repoName)}:</span>
                         <span class="repo-count">${count}</span>
                     </div>`;
@@ -109,6 +134,17 @@
             }
             
             statsDiv.innerHTML = html;
+            
+            // Add click handlers for repository stats
+            statsDiv.querySelectorAll('.clickable-repo').forEach(element => {
+                element.addEventListener('click', () => {
+                    const repoValue = element.getAttribute('data-repo');
+                    filterByRepository(repoValue);
+                });
+            });
+            
+            // Maintain visual state for selected repository
+            updateRepositoryHighlight(currentRepoFilter);
         }
     }
 
@@ -122,7 +158,11 @@
         
         if (appFilter) {
             appFilter.innerHTML = '<option value="">All Applications</option>';
-            filters.applications.forEach(app => {
+            // Sort applications alphabetically
+            const sortedApplications = [...filters.applications].sort((a, b) => 
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+            sortedApplications.forEach(app => {
                 const option = document.createElement('option');
                 option.value = app;
                 option.textContent = app;
@@ -132,7 +172,11 @@
         
         if (modeFilter) {
             modeFilter.innerHTML = '<option value="">All Modes</option>';
-            filters.modes.forEach(mode => {
+            // Sort modes alphabetically
+            const sortedModes = [...filters.modes].sort((a, b) => 
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+            sortedModes.forEach(mode => {
                 const option = document.createElement('option');
                 option.value = mode;
                 option.textContent = mode;
@@ -142,7 +186,11 @@
         
         if (repoFilter) {
             repoFilter.innerHTML = '<option value="">All Repositories</option>';
-            filters.repositories.forEach(repo => {
+            // Sort repositories alphabetically
+            const sortedRepositories = [...filters.repositories].sort((a, b) => 
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+            sortedRepositories.forEach(repo => {
                 const option = document.createElement('option');
                 option.value = repo;
                 option.textContent = repo;
@@ -150,6 +198,56 @@
             });
         }
     }
+
+    function filterByRepository(repository) {
+        console.log('[Filter] Filtering by repository:', repository);
+        
+        const repoFilter = document.getElementById('filterRepository');
+        if (repoFilter) {
+            // If clicking on the same repository that's already selected, clear the filter
+            if (repoFilter.value === repository) {
+                repoFilter.value = '';
+                repository = '';
+                console.log('[Filter] Clearing repository filter');
+            } else {
+                repoFilter.value = repository;
+            }
+            
+            // Update the visual state in the stats
+            updateRepositoryHighlight(repository);
+            
+            // Trigger search with the updated filter
+            performSearch();
+        }
+    }
+
+    function updateRepositoryHighlight(selectedRepository) {
+        const statsDiv = document.getElementById('stats');
+        if (statsDiv) {
+            // Remove previous highlights
+            statsDiv.querySelectorAll('.repo-stat').forEach(stat => {
+                stat.classList.remove('selected-repo');
+            });
+            
+            // Highlight the selected repository (if any)
+            if (selectedRepository) {
+                const selectedRepo = statsDiv.querySelector(`[data-repo="${selectedRepository}"]`);
+                if (selectedRepo) {
+                    selectedRepo.classList.add('selected-repo');
+                }
+            }
+        }
+    }
+
+    // Make clearRepositoryFilter globally accessible
+    window.clearRepositoryFilter = function() {
+        const repoFilter = document.getElementById('filterRepository');
+        if (repoFilter) {
+            repoFilter.value = '';
+            updateRepositoryHighlight('');
+            performSearch();
+        }
+    };
 
     function escapeHtml(text) {
         const div = document.createElement('div');
@@ -179,7 +277,11 @@
     
     document.getElementById('filterApplication')?.addEventListener('change', performSearch);
     document.getElementById('filterMode')?.addEventListener('change', performSearch);
-    document.getElementById('filterRepository')?.addEventListener('change', performSearch);
+    document.getElementById('filterRepository')?.addEventListener('change', (e) => {
+        const selectedRepo = e.target.value;
+        updateRepositoryHighlight(selectedRepo);
+        performSearch();
+    });
 
     // Toolbar button handlers
     document.getElementById('checkDbBtn')?.addEventListener('click', () => {

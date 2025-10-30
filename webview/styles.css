@@ -70,6 +70,22 @@ h1 {
     font-size: 14px;
 }
 
+.filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.filters select {
+    padding: 6px 10px;
+    background: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 4px;
+    font-size: 13px;
+    min-width: 150px;
+}
+
 .stats {
     margin-bottom: 15px;
     color: var(--vscode-descriptionForeground);
@@ -80,6 +96,33 @@ h1 {
     font-weight: 600;
     margin-bottom: 10px;
     color: var(--vscode-foreground);
+}
+
+.active-filter {
+    background: var(--vscode-textCodeBlock-background);
+    border: 1px solid var(--vscode-textLink-foreground);
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--vscode-foreground);
+}
+
+.clear-filter {
+    cursor: pointer;
+    color: var(--vscode-textLink-foreground);
+    margin-left: 8px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+}
+
+.clear-filter:hover {
+    background: var(--vscode-list-hoverBackground);
+    transform: scale(1.1);
 }
 
 .stats-breakdown h4 {
@@ -115,6 +158,23 @@ h1 {
     color: var(--vscode-textLink-foreground);
     font-weight: 600;
     font-family: var(--vscode-editor-font-family);
+}
+
+.clickable-repo {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clickable-repo:hover {
+    background: var(--vscode-list-hoverBackground);
+    border-radius: 4px;
+    transform: translateY(-1px);
+}
+
+.clickable-repo.selected-repo {
+    background: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+    border-radius: 4px;
 }
 
 .results-header {
@@ -185,6 +245,19 @@ h1 {
     font-size: 12px;
     color: var(--vscode-descriptionForeground);
     margin-top: 8px;
+}
+
+.clickable-repo-label {
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+}
+
+.clickable-repo-label:hover {
+    background: var(--vscode-list-hoverBackground);
+    color: var(--vscode-textLink-foreground);
+    transform: translateY(-1px);
 }
 
 .no-results {
