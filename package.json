@@ -1,0 +1,76 @@
+{
+  "name": "search-talon-commands",
+  "displayName": "Search Talon Commands",
+  "publisher": "mark-phillipson",
+  "description": "Search and browse 10k+ Talon Voice commands and lists with advanced filtering",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "@vscode/test-electron": "^2.3.8",
+    "typescript": "^5.0.0"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "talon.searchCommands",
+        "title": "Talon: Search Commands"
+      },
+      {
+        "command": "talon.refreshIndex",
+        "title": "Talon: Refresh Index"
+      },
+      {
+        "command": "talon.openListExplorer",
+        "title": "Talon: Browse Lists"
+      }
+    ],
+    "configuration": {
+      "title": "Talon Command Search",
+      "properties": {
+        "talonSearch.userFolderPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to Talon user folder (leave empty for auto-detection)"
+        },
+        "talonSearch.enableAutoIndexing": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically index Talon files on startup"
+        },
+        "talonSearch.maxSearchResults": {
+          "type": "number",
+          "default": 500,
+          "description": "Maximum search results to display"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "talon.searchCommands",
+        "key": "ctrl+shift+t",
+        "mac": "cmd+shift+t"
+      }
+    ]
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "dependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "better-sqlite3": "^12.4.1"
+  }
+}
