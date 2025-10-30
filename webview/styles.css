@@ -188,9 +188,30 @@ h1 {
 }
 
 .results {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 12px;
+}
+
+/* Ensure we get approximately 3 columns on most screens */
+@media (min-width: 1000px) {
+    .results {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* 2 columns on smaller screens */
+@media (max-width: 999px) and (min-width: 600px) {
+    .results {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 1 column on very small screens */
+@media (max-width: 599px) {
+    .results {
+        grid-template-columns: 1fr;
+    }
 }
 
 .command-card {
@@ -200,6 +221,7 @@ h1 {
     padding: 12px;
     cursor: pointer;
     transition: all 0.2s;
+    height: fit-content;
 }
 
 .command-card:hover {
