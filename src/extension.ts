@@ -158,14 +158,21 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                         console.log('[Search] Performing search with:', {
                             searchTerm: message.searchTerm,
                             searchScope: message.searchScope,
+                            searchScopeType: typeof message.searchScope,
                             application: message.application,
                             mode: message.mode,
                             repository: message.repository,
                             maxResults: message.maxResults
                         });
+                        
+                        // Ensure searchScope is a number - be careful with 0 being falsy
+                        const searchScope = typeof message.searchScope === 'number' ? message.searchScope : 
+                                          (message.searchScope !== undefined && message.searchScope !== null ? parseInt(message.searchScope) : 2);
+                        console.log('[Search] Normalized searchScope:', searchScope);
+                        
                         const results = db.searchCommands(
                             message.searchTerm || '',
-                            message.searchScope || 2,
+                            searchScope,
                             message.application,
                             message.mode,
                             message.repository,

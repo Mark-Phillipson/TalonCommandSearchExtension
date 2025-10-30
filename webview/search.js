@@ -13,12 +13,13 @@
     // Request search from extension host (SQLite backend)
     function performSearch() {
         const searchTerm = document.getElementById('searchInput')?.value.trim() || '';
-        const searchScope = parseInt(document.getElementById('searchScope')?.value || '2');
+        const scopeElement = document.getElementById('searchScope');
+        const searchScope = scopeElement ? parseInt(scopeElement.value) : 2;
         const application = document.getElementById('filterApplication')?.value || undefined;
         const mode = document.getElementById('filterMode')?.value || undefined;
         const repository = document.getElementById('filterRepository')?.value || undefined;
         
-        console.log('[Search] Performing search:', { searchTerm, searchScope, application, mode, repository });
+        console.log('[Search] Performing search:', { searchTerm, searchScope, scopeValue: scopeElement?.value, application, mode, repository });
         
         vscode.postMessage({
             command: 'search',

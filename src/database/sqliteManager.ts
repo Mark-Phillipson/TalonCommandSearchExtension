@@ -85,6 +85,8 @@ export class SqliteManager {
         repository?: string,
         maxResults: number = 500
     ): TalonVoiceCommand[] {
+        console.log(`[SqliteManager] Search called with: term="${searchTerm}", scope=${searchScope}, app="${application}", mode="${mode}", repo="${repository}"`);
+        
         let results = [...this.commands];
 
         // Apply filters
@@ -101,19 +103,32 @@ export class SqliteManager {
         // Apply search term
         if (searchTerm && searchTerm.trim().length > 0) {
             const term = searchTerm.trim().toLowerCase();
+            console.log(`[SqliteManager] Searching for term: "${term}"`);
             
             if (searchScope === 0) {
                 // CommandNamesOnly
+                console.log(`[SqliteManager] Using CommandNamesOnly search scope`);
+                const beforeCount = results.length;
                 results = results.filter(cmd => 
                     cmd.command.toLowerCase().includes(term)
                 );
+                console.log(`[SqliteManager] CommandNamesOnly: Filtered from ${beforeCount} to ${results.length} results`);
+                
+                // Log first few results for debugging
+                if (results.length > 0) {
+                    console.log(`[SqliteManager] First few CommandNamesOnly results:`, 
+                        results.slice(0, 3).map(cmd => ({ command: cmd.command, script: cmd.script.substring(0, 50) + '...' }))
+                    );
+                }
             } else if (searchScope === 1) {
                 // ScriptOnly
+                console.log(`[SqliteManager] Using ScriptOnly search scope`);
                 results = results.filter(cmd => 
                     cmd.script.toLowerCase().includes(term)
                 );
             } else {
                 // All - search in command, script, and application
+                console.log(`[SqliteManager] Using All search scope`);
                 results = results.filter(cmd => 
                     cmd.command.toLowerCase().includes(term) ||
                     cmd.script.toLowerCase().includes(term) ||
@@ -124,6 +139,7 @@ export class SqliteManager {
             }
         }
 
+        console.log(`[SqliteManager] Final result count: ${results.length}`);
         return results.slice(0, maxResults);
     }
 
