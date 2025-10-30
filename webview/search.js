@@ -83,11 +83,32 @@
         });
     }
 
-    function updateStats(total) {
+    function updateStats(total, repositoryBreakdown) {
         totalCommands = total;
         const statsDiv = document.getElementById('stats');
         if (statsDiv) {
-            statsDiv.textContent = `Total commands: ${total}`;
+            let html = `<div class="stats-total">Total commands: ${total}</div>`;
+            
+            if (repositoryBreakdown && Object.keys(repositoryBreakdown).length > 0) {
+                html += '<div class="stats-breakdown">';
+                html += '<h4>Commands by Repository:</h4>';
+                html += '<div class="repo-stats-container">';
+                
+                // Sort repositories by command count (descending)
+                const sortedRepos = Object.entries(repositoryBreakdown)
+                    .sort((a, b) => b[1] - a[1]);
+                
+                sortedRepos.forEach(([repo, count]) => {
+                    const repoName = repo || 'No Repository';
+                    html += `<div class="repo-stat">
+                        <span class="repo-name">${escapeHtml(repoName)}:</span>
+                        <span class="repo-count">${count}</span>
+                    </div>`;
+                });
+                html += '</div></div>';
+            }
+            
+            statsDiv.innerHTML = html;
         }
     }
 
@@ -188,7 +209,7 @@
                 
             case 'stats':
                 console.log('[Webview] Stats:', message.totalCommands, 'commands');
-                updateStats(message.totalCommands);
+                updateStats(message.totalCommands, message.repositoryBreakdown);
                 updateFilters(message.filters);
                 if (message.totalCommands > 0) {
                     performSearch();

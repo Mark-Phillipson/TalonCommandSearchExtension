@@ -1,14 +1,14 @@
-import Database from 'better-sqlite3';
 import * as path from 'path';
 import * as fs from 'fs';
 import { TalonVoiceCommand, TalonListItem } from '../types';
 
 export class SqliteManager {
-    private db: Database.Database | null = null;
+    private commands: TalonVoiceCommand[] = [];
     private dbPath: string;
+    private nextId: number = 1;
 
     constructor(storagePath: string) {
-        this.dbPath = path.join(storagePath, 'talon-commands.db');
+        this.dbPath = path.join(storagePath, 'talon-commands.json');
     }
 
     public initialize(): void {
@@ -18,147 +18,63 @@ export class SqliteManager {
             fs.mkdirSync(dir, { recursive: true });
         }
 
-        this.db = new Database(this.dbPath);
-        this.db.pragma('journal_mode = WAL');
-        this.db.pragma('synchronous = NORMAL');
-        this.createTables();
+        // Load existing data
+        this.loadFromFile();
     }
 
-    private createTables(): void {
-        if (!this.db) throw new Error('Database not initialized');
+    private loadFromFile(): void {
+        try {
+            if (fs.existsSync(this.dbPath)) {
+                const data = fs.readFileSync(this.dbPath, 'utf8');
+                const parsed = JSON.parse(data);
+                this.commands = parsed.commands || [];
+                this.nextId = parsed.nextId || 1;
+                console.log(`Loaded ${this.commands.length} commands from file`);
+            }
+        } catch (err) {
+            console.error('Error loading commands from file:', err);
+            this.commands = [];
+            this.nextId = 1;
+        }
+    }
 
-        // TalonVoiceCommand table
-        this.db.exec(`
-            CREATE TABLE IF NOT EXISTS talon_commands (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                command TEXT NOT NULL,
-                script TEXT NOT NULL,
-                application TEXT,
-                title TEXT,
-                mode TEXT,
-                operating_system TEXT,
-                file_path TEXT NOT NULL,
-                repository TEXT,
-                tags TEXT,
-                code_language TEXT,
-                language TEXT,
-                hostname TEXT,
-                created_at TEXT NOT NULL
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_command ON talon_commands(command);
-            CREATE INDEX IF NOT EXISTS idx_application ON talon_commands(application);
-            CREATE INDEX IF NOT EXISTS idx_repository ON talon_commands(repository);
-            CREATE INDEX IF NOT EXISTS idx_mode ON talon_commands(mode);
-            CREATE INDEX IF NOT EXISTS idx_file_path ON talon_commands(file_path);
-        `);
-
-        // TalonList table
-        this.db.exec(`
-            CREATE TABLE IF NOT EXISTS talon_lists (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                list_name TEXT NOT NULL,
-                spoken_form TEXT NOT NULL,
-                list_value TEXT NOT NULL,
-                source_file TEXT,
-                created_at TEXT NOT NULL,
-                imported_at TEXT NOT NULL
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_list_name ON talon_lists(list_name);
-            CREATE INDEX IF NOT EXISTS idx_spoken_form ON talon_lists(spoken_form);
-        `);
-
-        // FTS5 virtual table for full-text search on commands
-        this.db.exec(`
-            CREATE VIRTUAL TABLE IF NOT EXISTS talon_commands_fts USING fts5(
-                command,
-                script,
-                application,
-                title,
-                tags,
-                content='talon_commands',
-                content_rowid='id'
-            );
-
-            -- Triggers to keep FTS in sync
-            CREATE TRIGGER IF NOT EXISTS talon_commands_ai AFTER INSERT ON talon_commands BEGIN
-                INSERT INTO talon_commands_fts(rowid, command, script, application, title, tags)
-                VALUES (new.id, new.command, new.script, new.application, new.title, new.tags);
-            END;
-
-            CREATE TRIGGER IF NOT EXISTS talon_commands_ad AFTER DELETE ON talon_commands BEGIN
-                DELETE FROM talon_commands_fts WHERE rowid = old.id;
-            END;
-
-            CREATE TRIGGER IF NOT EXISTS talon_commands_au AFTER UPDATE ON talon_commands BEGIN
-                DELETE FROM talon_commands_fts WHERE rowid = old.id;
-                INSERT INTO talon_commands_fts(rowid, command, script, application, title, tags)
-                VALUES (new.id, new.command, new.script, new.application, new.title, new.tags);
-            END;
-        `);
+    private saveToFile(): void {
+        try {
+            const data = {
+                commands: this.commands,
+                nextId: this.nextId
+            };
+            fs.writeFileSync(this.dbPath, JSON.stringify(data, null, 2));
+            console.log(`Saved ${this.commands.length} commands to file`);
+        } catch (err) {
+            console.error('Error saving commands to file:', err);
+        }
     }
 
     public insertCommand(cmd: Omit<TalonVoiceCommand, 'id'>): number {
-        if (!this.db) throw new Error('Database not initialized');
+        const newCommand: TalonVoiceCommand = {
+            ...cmd,
+            id: this.nextId++,
+            application: cmd.application || 'global',
+            createdAt: cmd.createdAt || new Date().toISOString()
+        };
 
-        const stmt = this.db.prepare(`
-            INSERT INTO talon_commands (
-                command, script, application, title, mode, operating_system,
-                file_path, repository, tags, code_language, language, hostname, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-
-        const result = stmt.run(
-            cmd.command,
-            cmd.script,
-            cmd.application || 'global',
-            cmd.title || null,
-            cmd.mode || null,
-            cmd.operatingSystem || null,
-            cmd.filePath,
-            cmd.repository || null,
-            cmd.tags || null,
-            cmd.codeLanguage || null,
-            cmd.language || null,
-            cmd.hostname || null,
-            cmd.createdAt || new Date().toISOString()
-        );
-
-        return result.lastInsertRowid as number;
+        this.commands.push(newCommand);
+        this.saveToFile();
+        return newCommand.id;
     }
 
     public insertCommandsBatch(commands: Array<Omit<TalonVoiceCommand, 'id'>>): void {
-        if (!this.db) throw new Error('Database not initialized');
-
-        const insert = this.db.prepare(`
-            INSERT INTO talon_commands (
-                command, script, application, title, mode, operating_system,
-                file_path, repository, tags, code_language, language, hostname, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-
-        const insertMany = this.db.transaction((cmds: Array<Omit<TalonVoiceCommand, 'id'>>) => {
-            for (const cmd of cmds) {
-                insert.run(
-                    cmd.command,
-                    cmd.script,
-                    cmd.application || 'global',
-                    cmd.title || null,
-                    cmd.mode || null,
-                    cmd.operatingSystem || null,
-                    cmd.filePath,
-                    cmd.repository || null,
-                    cmd.tags || null,
-                    cmd.codeLanguage || null,
-                    cmd.language || null,
-                    cmd.hostname || null,
-                    cmd.createdAt || new Date().toISOString()
-                );
-            }
-        });
-
-        insertMany(commands);
+        for (const cmd of commands) {
+            const newCommand: TalonVoiceCommand = {
+                ...cmd,
+                id: this.nextId++,
+                application: cmd.application || 'global',
+                createdAt: cmd.createdAt || new Date().toISOString()
+            };
+            this.commands.push(newCommand);
+        }
+        this.saveToFile();
     }
 
     public searchCommands(
@@ -169,76 +85,50 @@ export class SqliteManager {
         repository?: string,
         maxResults: number = 500
     ): TalonVoiceCommand[] {
-        if (!this.db) throw new Error('Database not initialized');
+        let results = [...this.commands];
 
-        const conditions: string[] = [];
-        const params: any[] = [];
+        // Apply filters
+        if (application) {
+            results = results.filter(cmd => cmd.application === application);
+        }
+        if (mode) {
+            results = results.filter(cmd => cmd.mode && cmd.mode.includes(mode));
+        }
+        if (repository) {
+            results = results.filter(cmd => cmd.repository === repository);
+        }
 
-        // Search scope logic
+        // Apply search term
         if (searchTerm && searchTerm.trim().length > 0) {
-            const term = searchTerm.trim();
+            const term = searchTerm.trim().toLowerCase();
             
             if (searchScope === 0) {
-                // CommandNamesOnly - use LIKE for contains match
-                conditions.push('command LIKE ?');
-                params.push(`%${term}%`);
+                // CommandNamesOnly
+                results = results.filter(cmd => 
+                    cmd.command.toLowerCase().includes(term)
+                );
             } else if (searchScope === 1) {
                 // ScriptOnly
-                conditions.push('script LIKE ?');
-                params.push(`%${term}%`);
+                results = results.filter(cmd => 
+                    cmd.script.toLowerCase().includes(term)
+                );
             } else {
-                // All - use FTS5 for full-text search
-                const stmt = this.db.prepare(`
-                    SELECT c.* FROM talon_commands c
-                    INNER JOIN talon_commands_fts fts ON c.id = fts.rowid
-                    WHERE talon_commands_fts MATCH ?
-                    ${application ? 'AND c.application = ?' : ''}
-                    ${mode ? 'AND c.mode LIKE ?' : ''}
-                    ${repository ? 'AND c.repository = ?' : ''}
-                    LIMIT ?
-                `);
-
-                const ftsParams: any[] = [term];
-                if (application) ftsParams.push(application);
-                if (mode) ftsParams.push(`%${mode}%`);
-                if (repository) ftsParams.push(repository);
-                ftsParams.push(maxResults);
-
-                return stmt.all(...ftsParams).map(this.mapToCommand);
+                // All - search in command, script, and application
+                results = results.filter(cmd => 
+                    cmd.command.toLowerCase().includes(term) ||
+                    cmd.script.toLowerCase().includes(term) ||
+                    (cmd.application && cmd.application.toLowerCase().includes(term)) ||
+                    (cmd.title && cmd.title.toLowerCase().includes(term)) ||
+                    (cmd.tags && cmd.tags.toLowerCase().includes(term))
+                );
             }
         }
 
-        // Additional filters
-        if (application) {
-            conditions.push('application = ?');
-            params.push(application);
-        }
-        if (mode) {
-            conditions.push('mode LIKE ?');
-            params.push(`%${mode}%`);
-        }
-        if (repository) {
-            conditions.push('repository = ?');
-            params.push(repository);
-        }
-
-        const whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
-        const sql = `
-            SELECT * FROM talon_commands
-            ${whereClause}
-            LIMIT ?
-        `;
-
-        params.push(maxResults);
-
-        const stmt = this.db.prepare(sql);
-        return stmt.all(...params).map(this.mapToCommand);
+        return results.slice(0, maxResults);
     }
 
     public getCommandCount(): number {
-        if (!this.db) throw new Error('Database not initialized');
-        const result = this.db.prepare('SELECT COUNT(*) as count FROM talon_commands').get() as { count: number };
-        return result.count;
+        return this.commands.length;
     }
 
     public getFilterValues(): {
@@ -247,31 +137,10 @@ export class SqliteManager {
         repositories: string[];
         operatingSystems: string[];
     } {
-        if (!this.db) throw new Error('Database not initialized');
-
-        const applications = this.db.prepare(`
-            SELECT DISTINCT application FROM talon_commands
-            WHERE application IS NOT NULL
-            ORDER BY application
-        `).all().map((r: any) => r.application);
-
-        const modes = this.db.prepare(`
-            SELECT DISTINCT mode FROM talon_commands
-            WHERE mode IS NOT NULL
-            ORDER BY mode
-        `).all().map((r: any) => r.mode);
-
-        const repositories = this.db.prepare(`
-            SELECT DISTINCT repository FROM talon_commands
-            WHERE repository IS NOT NULL
-            ORDER BY repository
-        `).all().map((r: any) => r.repository);
-
-        const operatingSystems = this.db.prepare(`
-            SELECT DISTINCT operating_system FROM talon_commands
-            WHERE operating_system IS NOT NULL
-            ORDER BY operating_system
-        `).all().map((r: any) => r.operating_system);
+        const applications = [...new Set(this.commands.map(cmd => cmd.application).filter(Boolean) as string[])].sort();
+        const modes = [...new Set(this.commands.map(cmd => cmd.mode).filter(Boolean) as string[])].sort();
+        const repositories = [...new Set(this.commands.map(cmd => cmd.repository).filter(Boolean) as string[])].sort();
+        const operatingSystems = [...new Set(this.commands.map(cmd => cmd.operatingSystem).filter(Boolean) as string[])].sort();
 
         return {
             applications,
@@ -281,34 +150,24 @@ export class SqliteManager {
         };
     }
 
+    public getRepositoryBreakdown(): { [repository: string]: number } {
+        const breakdown: { [repository: string]: number } = {};
+        
+        this.commands.forEach(cmd => {
+            const repo = cmd.repository || 'No Repository';
+            breakdown[repo] = (breakdown[repo] || 0) + 1;
+        });
+        
+        return breakdown;
+    }
+
     public clearAllCommands(): void {
-        if (!this.db) throw new Error('Database not initialized');
-        this.db.exec('DELETE FROM talon_commands');
+        this.commands = [];
+        this.nextId = 1;
+        this.saveToFile();
     }
 
     public close(): void {
-        if (this.db) {
-            this.db.close();
-            this.db = null;
-        }
-    }
-
-    private mapToCommand(row: any): TalonVoiceCommand {
-        return {
-            id: row.id,
-            command: row.command,
-            script: row.script,
-            application: row.application,
-            title: row.title,
-            mode: row.mode,
-            operatingSystem: row.operating_system,
-            filePath: row.file_path,
-            repository: row.repository,
-            tags: row.tags,
-            codeLanguage: row.code_language,
-            language: row.language,
-            hostname: row.hostname,
-            createdAt: row.created_at
-        };
+        // Nothing to close for JSON-based storage
     }
 }

@@ -12,15 +12,15 @@ const parser = new TalonFileParser();
 export async function activate(context: vscode.ExtensionContext) {
     console.log('Talon Command Search extension is now active');
 
-    // Initialize SQLite database
+    // Initialize JSON database
     try {
         const storagePath = context.globalStorageUri.fsPath;
         db = new SqliteManager(storagePath);
         db.initialize();
-        console.log('SQLite database initialized at:', storagePath);
+        console.log('JSON database initialized at:', storagePath);
     } catch (err) {
         const error = err as Error;
-        console.error('Failed to initialize SQLite:', error);
+        console.error('Failed to initialize database:', error);
         vscode.window.showErrorMessage(`Talon Search: Failed to initialize database: ${error.message}`);
         // Create a dummy db to prevent crashes
         db = null as any;
@@ -144,6 +144,7 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                 switch (message.command) {
                     case 'search':
                         if (!db) {
+                            console.log('[Search] Database not initialized');
                             searchPanel?.webview.postMessage({
                                 command: 'searchResults',
                                 results: []
@@ -154,6 +155,14 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             });
                             break;
                         }
+                        console.log('[Search] Performing search with:', {
+                            searchTerm: message.searchTerm,
+                            searchScope: message.searchScope,
+                            application: message.application,
+                            mode: message.mode,
+                            repository: message.repository,
+                            maxResults: message.maxResults
+                        });
                         const results = db.searchCommands(
                             message.searchTerm || '',
                             message.searchScope || 2,
@@ -162,6 +171,7 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             message.repository,
                             message.maxResults || 500
                         );
+                        console.log('[Search] Found', results.length, 'results');
                         searchPanel?.webview.postMessage({
                             command: 'searchResults',
                             results: results
@@ -169,6 +179,7 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                         break;
                     case 'getStats':
                         if (!db) {
+                            console.log('[Stats] Database not initialized');
                             searchPanel?.webview.postMessage({
                                 command: 'stats',
                                 totalCommands: 0,
@@ -182,10 +193,13 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                         }
                         const count = db.getCommandCount();
                         const filters = db.getFilterValues();
+                        const repositoryBreakdown = db.getRepositoryBreakdown();
+                        console.log('[Stats] Command count:', count, 'Filter values:', filters, 'Repository breakdown:', repositoryBreakdown);
                         searchPanel?.webview.postMessage({
                             command: 'stats',
                             totalCommands: count,
-                            filters: filters
+                            filters: filters,
+                            repositoryBreakdown: repositoryBreakdown
                         });
                         break;
                     case 'clearDatabase':
@@ -200,7 +214,8 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                         searchPanel?.webview.postMessage({
                             command: 'stats',
                             totalCommands: 0,
-                            filters: { applications: [], modes: [], repositories: [], operatingSystems: [] }
+                            filters: { applications: [], modes: [], repositories: [], operatingSystems: [] },
+                            repositoryBreakdown: {}
                         });
                         vscode.window.showInformationMessage('Database cleared');
                         break;
@@ -234,16 +249,19 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
     if (db) {
         const count = db.getCommandCount();
         const filters = db.getFilterValues();
+        const repositoryBreakdown = db.getRepositoryBreakdown();
         searchPanel.webview.postMessage({
             command: 'stats',
             totalCommands: count,
-            filters: filters
+            filters: filters,
+            repositoryBreakdown: repositoryBreakdown
         });
     } else {
         searchPanel.webview.postMessage({
             command: 'stats',
             totalCommands: 0,
-            filters: { applications: [], modes: [], repositories: [], operatingSystems: [] }
+            filters: { applications: [], modes: [], repositories: [], operatingSystems: [] },
+            repositoryBreakdown: {}
         });
         searchPanel.webview.postMessage({
             command: 'error',
@@ -309,10 +327,12 @@ async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: st
         // Update webview if open
         if (searchPanel) {
             const filters = db.getFilterValues();
+            const repositoryBreakdown = db.getRepositoryBreakdown();
             searchPanel.webview.postMessage({
                 command: 'stats',
                 totalCommands: totalCount,
-                filters: filters
+                filters: filters,
+                repositoryBreakdown: repositoryBreakdown
             });
             searchPanel.webview.postMessage({
                 command: 'importComplete',
@@ -391,7 +411,7 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${styleUri.toString().replace(/[^:]+:/, '')} 'unsafe-inline'; script-src ${scriptUri.toString().replace(/[^:]+:/, '')};">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' vscode-resource:; script-src vscode-resource:;">
     <link href="${styleUri}" rel="stylesheet">
     <title>Talon Command Search</title>
 </head>

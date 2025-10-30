@@ -76,6 +76,47 @@ h1 {
     font-size: 13px;
 }
 
+.stats-total {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--vscode-foreground);
+}
+
+.stats-breakdown h4 {
+    margin: 8px 0 4px 0;
+    color: var(--vscode-foreground);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.repo-stats-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.repo-stat {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    background: var(--vscode-list-inactiveSelectionBackground);
+    border-radius: 3px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.repo-name {
+    color: var(--vscode-foreground);
+    margin-right: 4px;
+}
+
+.repo-count {
+    color: var(--vscode-textLink-foreground);
+    font-weight: 600;
+    font-family: var(--vscode-editor-font-family);
+}
+
 .results-header {
     margin-bottom: 12px;
     padding: 8px 12px;
