@@ -45,9 +45,10 @@ h1 {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
+    align-items: stretch;
 }
 
-#searchInput {
+#searchInput, #listSearchInput {
     flex: 1;
     padding: 8px 12px;
     background: var(--vscode-input-background);
@@ -57,8 +58,33 @@ h1 {
     font-size: 14px;
 }
 
-#searchInput:focus {
+#searchInput:focus, #listSearchInput:focus {
     outline: 1px solid var(--vscode-focusBorder);
+}
+
+.clear-search-btn {
+    padding: 8px 12px;
+    background: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: var(--vscode-font-family);
+    min-width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.clear-search-btn:hover {
+    background: var(--vscode-button-secondaryHoverBackground);
+    border-color: var(--vscode-focusBorder);
+}
+
+.clear-search-btn:active {
+    opacity: 0.8;
 }
 
 #searchScope {
@@ -188,28 +214,38 @@ h1 {
 }
 
 .results {
+    display: block;
+}
+
+/* Command results use grid layout */
+#results {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 12px;
 }
 
+/* List results use block layout for compact display */
+#listResults {
+    display: block;
+}
+
 /* Ensure we get approximately 3 columns on most screens */
 @media (min-width: 1000px) {
-    .results {
+    #results {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
 /* 2 columns on smaller screens */
 @media (max-width: 999px) and (min-width: 600px) {
-    .results {
+    #results {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 /* 1 column on very small screens */
 @media (max-width: 599px) {
-    .results {
+    #results {
         grid-template-columns: 1fr;
     }
 }
@@ -298,4 +334,256 @@ h1 {
     border: 1px solid var(--vscode-inputValidation-errorBorder);
     border-radius: 4px;
     margin: 20px 0;
+}
+
+/* Tab styles */
+.tabs {
+    display: flex;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    background: transparent;
+    color: var(--vscode-descriptionForeground);
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: var(--vscode-font-family);
+    transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+    color: var(--vscode-foreground);
+    background: var(--vscode-list-hoverBackground);
+}
+
+.tab-button.active {
+    color: var(--vscode-textLink-foreground);
+    border-bottom-color: var(--vscode-textLink-foreground);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* List display styles */
+.list-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 16px 0 8px 0;
+    padding: 6px 12px;
+    background: var(--vscode-textBlockQuote-background);
+    border-left: 3px solid var(--vscode-textLink-foreground);
+    border-radius: 0 4px 4px 0;
+}
+
+.list-group-header h3 {
+    margin: 0;
+    color: var(--vscode-foreground);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.list-count {
+    background: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.list-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.list-table thead {
+    background: var(--vscode-editorGroupHeader-tabsBackground);
+}
+
+.list-table th {
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    font-size: 13px;
+}
+
+.list-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    font-size: 13px;
+    vertical-align: top;
+}
+
+.list-item-row:nth-child(even) {
+    background: var(--vscode-list-inactiveSelectionBackground);
+}
+
+.list-item-row:hover {
+    background: var(--vscode-list-hoverBackground);
+}
+
+.spoken-form {
+    font-family: var(--vscode-editor-font-family);
+    color: var(--vscode-textLink-foreground);
+    font-weight: 500;
+    min-width: 120px;
+}
+
+.list-value {
+    font-family: var(--vscode-editor-font-family);
+    color: var(--vscode-foreground);
+    word-break: break-all;
+}
+
+.source-file {
+    color: var(--vscode-descriptionForeground);
+    font-size: 12px;
+    min-width: 100px;
+}
+
+.source-file.clickable {
+    cursor: pointer;
+    color: var(--vscode-textLink-foreground);
+    text-decoration: underline;
+}
+
+.source-file.clickable:hover {
+    color: var(--vscode-textLink-activeForeground);
+}
+
+/* List names display in stats */
+.collapsible-header {
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s ease;
+}
+
+.collapsible-header:hover {
+    color: var(--vscode-textLink-foreground);
+}
+
+.toggle-icon {
+    font-size: 10px;
+    transition: transform 0.2s ease;
+}
+
+.list-names-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+    max-height: 120px;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+.list-names-container.collapsed {
+    max-height: 0;
+    overflow: hidden;
+    margin-top: 0;
+}
+
+.list-name-tag {
+    display: inline-block;
+    padding: 2px 6px;
+    background: var(--vscode-list-inactiveSelectionBackground);
+    color: var(--vscode-foreground);
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: var(--vscode-editor-font-family);
+}
+
+.clickable-list-filter {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clickable-list-filter:hover {
+    background: var(--vscode-list-hoverBackground);
+    color: var(--vscode-textLink-foreground);
+    transform: scale(1.05);
+}
+
+/* Compact list item display */
+.list-items-container {
+    margin-bottom: 20px;
+    background: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 6px;
+    padding: 8px;
+}
+
+.list-item-compact {
+    padding: 4px 8px;
+    margin: 2px 0;
+    border-radius: 3px;
+    font-size: 13px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    transition: background-color 0.2s ease;
+}
+
+.list-item-compact:hover {
+    background: var(--vscode-list-hoverBackground);
+}
+
+.spoken-form-compact {
+    font-family: var(--vscode-editor-font-family);
+    color: var(--vscode-textLink-foreground);
+    font-weight: 500;
+    margin-right: 4px;
+}
+
+.arrow {
+    color: var(--vscode-descriptionForeground);
+    margin: 0 4px;
+}
+
+.list-value-compact {
+    font-family: var(--vscode-editor-font-family);
+    color: var(--vscode-foreground);
+    margin-right: 8px;
+    word-break: break-all;
+    flex: 1;
+    min-width: 0;
+}
+
+.source-compact {
+    color: var(--vscode-descriptionForeground);
+    font-size: 11px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.source-compact.clickable {
+    cursor: pointer;
+    color: var(--vscode-textLink-foreground);
+    text-decoration: underline;
+}
+
+.source-compact.clickable:hover {
+    color: var(--vscode-textLink-activeForeground);
 }

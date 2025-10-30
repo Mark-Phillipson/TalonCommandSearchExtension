@@ -9,6 +9,9 @@
         operatingSystems: []
     };
     let totalCommands = 0;
+    let totalLists = 0;
+    let listNames = [];
+    let currentTab = 'commands';
 
     // Request search from extension host (SQLite backend)
     function performSearch() {
@@ -29,6 +32,107 @@
             mode: mode === '' ? undefined : mode,
             repository: repository === '' ? undefined : repository,
             maxResults: 500
+        });
+    }
+
+    // Request list search from extension host
+    function performListSearch() {
+        const searchTerm = document.getElementById('listSearchInput')?.value.trim() || '';
+        
+        console.log('[ListSearch] Performing list search:', { searchTerm });
+        
+        vscode.postMessage({
+            command: 'searchLists',
+            searchTerm: searchTerm,
+            maxResults: 500
+        });
+    }
+
+    // Display list results in UI
+    function displayListResults(results) {
+        const resultsDiv = document.getElementById('listResults');
+        if (!resultsDiv) return;
+        
+        resultsDiv.innerHTML = '';
+        
+        if (results.length === 0) {
+            resultsDiv.innerHTML = '<p class="no-results">No list items found. Try importing your Talon files first (Talon: Refresh Index)</p>';
+            return;
+        }
+        
+        // Add result count header
+        const header = document.createElement('div');
+        header.className = 'results-header';
+        header.textContent = `Found ${results.length} list item${results.length !== 1 ? 's' : ''}`;
+        resultsDiv.appendChild(header);
+        
+        // Group results by list name
+        const groupedResults = {};
+        results.forEach(item => {
+            if (!groupedResults[item.listName]) {
+                groupedResults[item.listName] = [];
+            }
+            groupedResults[item.listName].push(item);
+        });
+        
+        // Display grouped results
+        Object.keys(groupedResults).sort().forEach(listName => {
+            const items = groupedResults[listName];
+            
+            // Create list group header
+            const groupHeader = document.createElement('div');
+            groupHeader.className = 'list-group-header';
+            groupHeader.innerHTML = `
+                <h3>${escapeHtml(listName)}</h3>
+                <span class="list-count">${items.length} item${items.length !== 1 ? 's' : ''}</span>
+            `;
+            resultsDiv.appendChild(groupHeader);
+            
+            // Create compact list container instead of table
+            const listContainer = document.createElement('div');
+            listContainer.className = 'list-items-container';
+            
+            items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'list-item-compact';
+                
+                // Create compact single line format: "spoken_form → list_value (source)"
+                const spokenSpan = document.createElement('span');
+                spokenSpan.className = 'spoken-form-compact';
+                spokenSpan.textContent = item.spokenForm;
+                
+                const arrowSpan = document.createElement('span');
+                arrowSpan.className = 'arrow';
+                arrowSpan.textContent = ' → ';
+                
+                const valueSpan = document.createElement('span');
+                valueSpan.className = 'list-value-compact';
+                valueSpan.textContent = item.listValue;
+                
+                const sourceSpan = document.createElement('span');
+                sourceSpan.className = 'source-compact';
+                if (item.sourceFile) {
+                    const fileName = item.sourceFile.split(/[\\/]/).pop() || item.sourceFile;
+                    sourceSpan.textContent = ` (${fileName})`;
+                    sourceSpan.title = item.sourceFile;
+                    sourceSpan.classList.add('clickable');
+                    sourceSpan.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        vscode.postMessage({ command: 'openFile', filePath: item.sourceFile });
+                    });
+                } else {
+                    sourceSpan.textContent = '';
+                }
+                
+                itemDiv.appendChild(spokenSpan);
+                itemDiv.appendChild(arrowSpan);
+                itemDiv.appendChild(valueSpan);
+                itemDiv.appendChild(sourceSpan);
+                
+                listContainer.appendChild(itemDiv);
+            });
+            
+            resultsDiv.appendChild(listContainer);
         });
     }
 
@@ -98,8 +202,40 @@
         });
     }
 
-    function updateStats(total, repositoryBreakdown) {
+    // Tab switching functionality
+    function switchTab(tabName) {
+        currentTab = tabName;
+        
+        // Update tab buttons
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-tab') === tabName) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        const targetTab = document.getElementById(tabName + 'Tab');
+        if (targetTab) {
+            targetTab.classList.add('active');
+        }
+        
+        // Trigger appropriate search based on current tab
+        if (tabName === 'commands') {
+            performSearch();
+        } else if (tabName === 'lists') {
+            performListSearch();
+        }
+    }
+
+    function updateStats(total, repositoryBreakdown, listCount, listNamesList) {
         totalCommands = total;
+        totalLists = listCount || 0;
+        listNames = listNamesList || [];
         const statsDiv = document.getElementById('stats');
         if (statsDiv) {
             const currentRepoFilter = document.getElementById('filterRepository')?.value || '';
@@ -146,6 +282,56 @@
             
             // Maintain visual state for selected repository
             updateRepositoryHighlight(currentRepoFilter);
+        }
+        
+        // Update list stats
+        const listStatsDiv = document.getElementById('listStats');
+        if (listStatsDiv) {
+            let listHtml = `<div class="stats-total">Total list items: ${totalLists}</div>`;
+            
+            if (listNames.length > 0) {
+                listHtml += '<div class="stats-breakdown">';
+                listHtml += `<h4 class="collapsible-header" data-toggle="listNames">
+                    <span class="toggle-icon">▼</span>
+                    Available Lists (${listNames.length}):
+                </h4>`;
+                listHtml += '<div class="list-names-container collapsed" data-container="listNames">';
+                
+                listNames.forEach(listName => {
+                    listHtml += `<span class="list-name-tag clickable-list-filter" data-list="${escapeHtml(listName)}" title="Click to filter by ${escapeHtml(listName)}">${escapeHtml(listName)}</span>`;
+                });
+                
+                listHtml += '</div></div>';
+            }
+            
+            listStatsDiv.innerHTML = listHtml;
+            
+            // Add click handlers for list name filters
+            listStatsDiv.querySelectorAll('.clickable-list-filter').forEach(element => {
+                element.addEventListener('click', () => {
+                    const listName = element.getAttribute('data-list');
+                    filterByListName(listName);
+                });
+            });
+            
+            // Add click handler for toggle header
+            const toggleHeader = listStatsDiv.querySelector('.collapsible-header');
+            if (toggleHeader) {
+                toggleHeader.addEventListener('click', () => {
+                    const container = listStatsDiv.querySelector('[data-container="listNames"]');
+                    const toggle = toggleHeader.querySelector('.toggle-icon');
+                    
+                    if (container && toggle) {
+                        if (container.classList.contains('collapsed')) {
+                            container.classList.remove('collapsed');
+                            toggle.textContent = '▲';
+                        } else {
+                            container.classList.add('collapsed');
+                            toggle.textContent = '▼';
+                        }
+                    }
+                });
+            }
         }
     }
 
@@ -249,6 +435,27 @@
             performSearch();
         }
     };
+
+
+
+    // Filter by list name
+    function filterByListName(listName) {
+        console.log('[Filter] Filtering by list name:', listName);
+        
+        const searchInput = document.getElementById('listSearchInput');
+        if (searchInput) {
+            // If clicking on the same list that's already being searched, clear the filter
+            if (searchInput.value === listName) {
+                searchInput.value = '';
+                console.log('[Filter] Clearing list name filter');
+            } else {
+                searchInput.value = listName;
+            }
+            
+            // Trigger search with the updated filter
+            performListSearch();
+        }
+    }
 
     function escapeHtml(text) {
         const div = document.createElement('div');
@@ -365,6 +572,36 @@
         } else {
             console.error('[Init] Refresh button not found!');
         }
+        
+        // Tab button handlers
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.getAttribute('data-tab');
+                if (tabName) {
+                    switchTab(tabName);
+                }
+            });
+        });
+        
+        // List search input handler
+        const listSearchInput = document.getElementById('listSearchInput');
+        if (listSearchInput) {
+            listSearchInput.addEventListener('input', performListSearch);
+            console.log('[Init] List search input listener attached');
+        }
+        
+        // Clear list search button handler
+        const clearListSearchBtn = document.getElementById('clearListSearch');
+        if (clearListSearchBtn) {
+            clearListSearchBtn.addEventListener('click', () => {
+                const listSearchInput = document.getElementById('listSearchInput');
+                if (listSearchInput) {
+                    listSearchInput.value = '';
+                    performListSearch();
+                }
+            });
+            console.log('[Init] Clear list search button listener attached');
+        }
     }
 
     // Handle messages from extension
@@ -379,12 +616,19 @@
                 break;
                 
             case 'stats':
-                console.log('[Webview] Stats:', message.totalCommands, 'commands');
-                updateStats(message.totalCommands, message.repositoryBreakdown);
+                console.log('[Webview] Stats:', message.totalCommands, 'commands,', message.totalLists, 'list items');
+                updateStats(message.totalCommands, message.repositoryBreakdown, message.totalLists, message.listNames);
                 updateFilters(message.filters);
-                if (message.totalCommands > 0) {
+                if (currentTab === 'commands' && message.totalCommands > 0) {
                     performSearch();
+                } else if (currentTab === 'lists' && message.totalLists > 0) {
+                    performListSearch();
                 }
+                break;
+                
+            case 'listSearchResults':
+                console.log('[Webview] Displaying', message.results.length, 'list results');
+                displayListResults(message.results);
                 break;
                 
             case 'importComplete':

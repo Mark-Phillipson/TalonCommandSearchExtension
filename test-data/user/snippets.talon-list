@@ -1,0 +1,5 @@
+hello world: print("Hello, World!")
+goodbye: print("Goodbye!")
+debug message: console.log("Debug message")
+error message: console.error("Error occurred")
+warning: console.warn("Warning message")

@@ -4,8 +4,10 @@ import { TalonVoiceCommand, TalonListItem } from '../types';
 
 export class SqliteManager {
     private commands: TalonVoiceCommand[] = [];
+    private lists: TalonListItem[] = [];
     private dbPath: string;
     private nextId: number = 1;
+    private nextListId: number = 1;
 
     constructor(storagePath: string) {
         this.dbPath = path.join(storagePath, 'talon-commands.json');
@@ -28,13 +30,17 @@ export class SqliteManager {
                 const data = fs.readFileSync(this.dbPath, 'utf8');
                 const parsed = JSON.parse(data);
                 this.commands = parsed.commands || [];
+                this.lists = parsed.lists || [];
                 this.nextId = parsed.nextId || 1;
-                console.log(`Loaded ${this.commands.length} commands from file`);
+                this.nextListId = parsed.nextListId || 1;
+                console.log(`Loaded ${this.commands.length} commands and ${this.lists.length} list items from file`);
             }
         } catch (err) {
-            console.error('Error loading commands from file:', err);
+            console.error('Error loading data from file:', err);
             this.commands = [];
+            this.lists = [];
             this.nextId = 1;
+            this.nextListId = 1;
         }
     }
 
@@ -42,12 +48,14 @@ export class SqliteManager {
         try {
             const data = {
                 commands: this.commands,
-                nextId: this.nextId
+                lists: this.lists,
+                nextId: this.nextId,
+                nextListId: this.nextListId
             };
             fs.writeFileSync(this.dbPath, JSON.stringify(data, null, 2));
-            console.log(`Saved ${this.commands.length} commands to file`);
+            console.log(`Saved ${this.commands.length} commands and ${this.lists.length} list items to file`);
         } catch (err) {
-            console.error('Error saving commands to file:', err);
+            console.error('Error saving data to file:', err);
         }
     }
 
@@ -197,9 +205,107 @@ export class SqliteManager {
         return breakdown;
     }
 
+    // List management methods
+    public insertListItem(item: Omit<TalonListItem, 'id'>): number {
+        const newItem: TalonListItem = {
+            ...item,
+            id: this.nextListId++,
+            createdAt: item.createdAt || new Date().toISOString(),
+            importedAt: item.importedAt || new Date().toISOString()
+        };
+
+        this.lists.push(newItem);
+        this.saveToFile();
+        return newItem.id;
+    }
+
+    public insertListItemsBatch(items: Array<Omit<TalonListItem, 'id'>>): void {
+        for (const item of items) {
+            const newItem: TalonListItem = {
+                ...item,
+                id: this.nextListId++,
+                createdAt: item.createdAt || new Date().toISOString(),
+                importedAt: item.importedAt || new Date().toISOString()
+            };
+            this.lists.push(newItem);
+        }
+        this.saveToFile();
+    }
+
+    public refreshListItemsBatch(items: Array<Omit<TalonListItem, 'id'>>): void {
+        // Clear existing lists before inserting new ones
+        console.log(`Clearing ${this.lists.length} existing list items before refresh`);
+        this.lists = [];
+        this.nextListId = 1;
+        
+        // Insert new list items
+        for (const item of items) {
+            const newItem: TalonListItem = {
+                ...item,
+                id: this.nextListId++,
+                createdAt: item.createdAt || new Date().toISOString(),
+                importedAt: item.importedAt || new Date().toISOString()
+            };
+            this.lists.push(newItem);
+        }
+        this.saveToFile();
+        console.log(`List refresh complete: imported ${items.length} list items`);
+    }
+
+    public searchListItems(
+        searchTerm: string,
+        maxResults: number = 500
+    ): TalonListItem[] {
+        console.log(`[SqliteManager] List search called with: term="${searchTerm}"`);
+        
+        let results = [...this.lists];
+
+        // Apply search term
+        if (searchTerm && searchTerm.trim().length > 0) {
+            const term = searchTerm.trim().toLowerCase();
+            console.log(`[SqliteManager] Searching lists for term: "${term}"`);
+            
+            results = results.filter(item => 
+                item.listName.toLowerCase().includes(term) ||
+                item.spokenForm.toLowerCase().includes(term) ||
+                item.listValue.toLowerCase().includes(term) ||
+                (item.sourceFile && item.sourceFile.toLowerCase().includes(term))
+            );
+        }
+
+        console.log(`[SqliteManager] Final list result count: ${results.length}`);
+        return results.slice(0, maxResults);
+    }
+
+    public getListCount(): number {
+        return this.lists.length;
+    }
+
+    public getListNames(): string[] {
+        return [...new Set(this.lists.map(item => item.listName))].sort();
+    }
+
+    public getListItemsByName(listName: string): TalonListItem[] {
+        return this.lists.filter(item => item.listName === listName);
+    }
+
     public clearAllCommands(): void {
         this.commands = [];
         this.nextId = 1;
+        this.saveToFile();
+    }
+
+    public clearAllLists(): void {
+        this.lists = [];
+        this.nextListId = 1;
+        this.saveToFile();
+    }
+
+    public clearAllData(): void {
+        this.commands = [];
+        this.lists = [];
+        this.nextId = 1;
+        this.nextListId = 1;
         this.saveToFile();
     }
 

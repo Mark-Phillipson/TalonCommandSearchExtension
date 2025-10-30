@@ -1,13 +1,15 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { TalonVoiceCommand, SearchScope } from './types';
+import { TalonVoiceCommand, TalonListItem, SearchScope } from './types';
 import { SqliteManager } from './database/sqliteManager';
 import { TalonFileParser } from './parser/talonFileParser';
+import { TalonListParser } from './parser/talonListParser';
 
 let searchPanel: vscode.WebviewPanel | undefined;
 let db: SqliteManager;
 const parser = new TalonFileParser();
+const listParser = new TalonListParser();
 
 export async function activate(context: vscode.ExtensionContext) {
     console.log('Talon Command Search extension is now active');
@@ -232,6 +234,30 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             results: results
                         });
                         break;
+                    case 'searchLists':
+                        if (!db) {
+                            console.log('[List Search] Database not initialized');
+                            searchPanel?.webview.postMessage({
+                                command: 'listSearchResults',
+                                results: []
+                            });
+                            return;
+                        }
+                        console.log('[List Search] Performing list search with:', {
+                            searchTerm: message.searchTerm,
+                            maxResults: message.maxResults
+                        });
+                        
+                        const listResults = db.searchListItems(
+                            message.searchTerm || '',
+                            message.maxResults || 500
+                        );
+                        console.log('[List Search] Found', listResults.length, 'results');
+                        searchPanel?.webview.postMessage({
+                            command: 'listSearchResults',
+                            results: listResults
+                        });
+                        break;
                     case 'getStats':
                         if (!db) {
                             console.log('[Stats] Database not initialized');
@@ -247,14 +273,18 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             break;
                         }
                         const count = db.getCommandCount();
+                        const listCount = db.getListCount();
                         const filters = db.getFilterValues();
                         const repositoryBreakdown = db.getRepositoryBreakdown();
-                        console.log('[Stats] Command count:', count, 'Filter values:', filters, 'Repository breakdown:', repositoryBreakdown);
+                        const listNames = db.getListNames();
+                        console.log('[Stats] Command count:', count, 'List count:', listCount, 'Filter values:', filters, 'Repository breakdown:', repositoryBreakdown);
                         searchPanel?.webview.postMessage({
                             command: 'stats',
                             totalCommands: count,
+                            totalLists: listCount,
                             filters: filters,
-                            repositoryBreakdown: repositoryBreakdown
+                            repositoryBreakdown: repositoryBreakdown,
+                            listNames: listNames
                         });
                         break;
 
@@ -278,29 +308,27 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             'Clear Database'
                         );
                         if (result === 'Clear Database') {
-                            if (!db) {
-                                vscode.window.showErrorMessage('Database not initialized. Please reload the window.');
-                                break;
-                            }
-                            const commandCount = db.getCommandCount();
-                            db.clearAllCommands();
-                            console.log(`[ClearDatabase] Cleared ${commandCount} commands from database`);
+                            db.clearAllData();
+                            searchPanel?.webview.postMessage({
+                                command: 'databaseCleared'
+                            });
                             
-                            // Update webview with empty stats
+                            // Update stats after clearing
+                            const count = db.getCommandCount();
+                            const listCount = db.getListCount();
+                            const filters = db.getFilterValues();
+                            const repositoryBreakdown = db.getRepositoryBreakdown();
+                            const listNames = db.getListNames();
                             searchPanel?.webview.postMessage({
                                 command: 'stats',
-                                totalCommands: 0,
-                                filters: { applications: [], modes: [], repositories: [], operatingSystems: [] },
-                                repositoryBreakdown: {}
+                                totalCommands: count,
+                                totalLists: listCount,
+                                filters: filters,
+                                repositoryBreakdown: repositoryBreakdown,
+                                listNames: listNames
                             });
                             
-                            // Clear search results
-                            searchPanel?.webview.postMessage({
-                                command: 'searchResults',
-                                results: []
-                            });
-                            
-                            vscode.window.showInformationMessage(`Database cleared - removed ${commandCount} commands`);
+                            vscode.window.showInformationMessage('Database cleared successfully');
                         }
                         break;
                     case 'log':
@@ -322,20 +350,26 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
     // Send initial data to webview
     if (db) {
         const count = db.getCommandCount();
+        const listCount = db.getListCount();
         const filters = db.getFilterValues();
         const repositoryBreakdown = db.getRepositoryBreakdown();
+        const listNames = db.getListNames();
         searchPanel.webview.postMessage({
             command: 'stats',
             totalCommands: count,
+            totalLists: listCount,
             filters: filters,
-            repositoryBreakdown: repositoryBreakdown
+            repositoryBreakdown: repositoryBreakdown,
+            listNames: listNames
         });
     } else {
         searchPanel.webview.postMessage({
             command: 'stats',
             totalCommands: 0,
+            totalLists: 0,
             filters: { applications: [], modes: [], repositories: [], operatingSystems: [] },
-            repositoryBreakdown: {}
+            repositoryBreakdown: {},
+            listNames: []
         });
         searchPanel.webview.postMessage({
             command: 'error',
@@ -358,17 +392,19 @@ async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: st
         progress.report({ increment: 0, message: "Scanning files..." });
 
         const files = await getTalonFiles(rootFolder);
-        console.log(`Found ${files.length} .talon files`);
+        const listFiles = await getTalonListFiles(rootFolder);
+        console.log(`Found ${files.length} .talon files and ${listFiles.length} .talon-list files`);
         
-        progress.report({ increment: 30, message: `Found ${files.length} .talon files` });
+        progress.report({ increment: 30, message: `Found ${files.length} .talon files and ${listFiles.length} list files` });
 
-        if (files.length === 0) {
-            vscode.window.showWarningMessage('No .talon files found in selected folder');
+        if (files.length === 0 && listFiles.length === 0) {
+            vscode.window.showWarningMessage('No .talon or .talon-list files found in selected folder');
             return;
         }
 
-        // Parse all files
+        // Parse all command files
         let allCommands: Array<Omit<TalonVoiceCommand, 'id'>> = [];
+        let allListItems: Array<Omit<TalonListItem, 'id'>> = [];
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             try {
@@ -386,45 +422,71 @@ async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: st
             }
         }
 
+        // Parse all list files
+        for (let i = 0; i < listFiles.length; i++) {
+            const file = listFiles[i];
+            try {
+                const listItems = listParser.parseListFile(file.path, file.content);
+                allListItems = allListItems.concat(listItems);
+                
+                if (i % 10 === 0) {
+                    progress.report({ 
+                        increment: (10 / (files.length + listFiles.length)) * 50,
+                        message: `Parsing list files ${i}/${listFiles.length}` 
+                    });
+                }
+            } catch (err) {
+                console.error(`Failed to parse list file ${file.path}:`, err);
+            }
+        }
+
         if (isRefresh) {
-            progress.report({ increment: 80, message: `Refreshing database with ${allCommands.length} commands (clearing old ones)...` });
+            progress.report({ increment: 80, message: `Refreshing database with ${allCommands.length} commands and ${allListItems.length} list items (clearing old ones)...` });
 
-            // Clear existing commands and insert new ones to avoid duplicates
-            console.log(`Refreshing database with ${allCommands.length} commands (clearing existing first)`);
+            // Clear existing data and insert new ones to avoid duplicates
+            console.log(`Refreshing database with ${allCommands.length} commands and ${allListItems.length} list items (clearing existing first)`);
             db.refreshCommandsBatch(allCommands);
+            db.refreshListItemsBatch(allListItems);
 
-            console.log(`Refresh complete. Total commands in database: ${db.getCommandCount()}`);
+            console.log(`Refresh complete. Total commands: ${db.getCommandCount()}, Total list items: ${db.getListCount()}`);
             progress.report({ increment: 100, message: "Refresh complete" });
 
-            vscode.window.showInformationMessage(`Refreshed index with ${allCommands.length} commands. Total in database: ${db.getCommandCount()}`);
+            vscode.window.showInformationMessage(`Refreshed index with ${allCommands.length} commands and ${allListItems.length} list items. Total in database: ${db.getCommandCount()} commands, ${db.getListCount()} list items`);
         } else {
-            progress.report({ increment: 80, message: `Adding ${allCommands.length} commands to database...` });
+            progress.report({ increment: 80, message: `Adding ${allCommands.length} commands and ${allListItems.length} list items to database...` });
 
-            // Add commands to existing ones
-            console.log(`Adding ${allCommands.length} commands to database`);
+            // Add items to existing ones
+            console.log(`Adding ${allCommands.length} commands and ${allListItems.length} list items to database`);
             db.insertCommandsBatch(allCommands);
+            db.insertListItemsBatch(allListItems);
 
-            console.log(`Import complete. Total commands in database: ${db.getCommandCount()}`);
+            console.log(`Import complete. Total commands: ${db.getCommandCount()}, Total list items: ${db.getListCount()}`);
             progress.report({ increment: 100, message: "Import complete" });
 
-            vscode.window.showInformationMessage(`Added ${allCommands.length} commands. Total in database: ${db.getCommandCount()}`);
+            vscode.window.showInformationMessage(`Added ${allCommands.length} commands and ${allListItems.length} list items. Total in database: ${db.getCommandCount()} commands, ${db.getListCount()} list items`);
         }
 
         // Update webview if open
         if (searchPanel) {
             const totalCount = db.getCommandCount();
+            const totalListCount = db.getListCount();
             const filters = db.getFilterValues();
             const repositoryBreakdown = db.getRepositoryBreakdown();
+            const listNames = db.getListNames();
             searchPanel.webview.postMessage({
                 command: 'stats',
                 totalCommands: totalCount,
+                totalLists: totalListCount,
                 filters: filters,
-                repositoryBreakdown: repositoryBreakdown
+                repositoryBreakdown: repositoryBreakdown,
+                listNames: listNames
             });
             searchPanel.webview.postMessage({
                 command: 'importComplete',
-                imported: allCommands.length,
-                total: totalCount
+                importedCommands: allCommands.length,
+                importedLists: allListItems.length,
+                totalCommands: totalCount,
+                totalLists: totalListCount
             });
         }
     });
@@ -448,6 +510,36 @@ async function getTalonFiles(rootFolder: string): Promise<Array<{path: string, c
                         files.push({ path: fullPath, content });
                     } catch (err) {
                         console.error(`Failed to read ${fullPath}:`, err);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error(`Failed to scan directory ${dir}:`, err);
+        }
+    }
+
+    await scanDirectory(rootFolder);
+    return files;
+}
+
+async function getTalonListFiles(rootFolder: string): Promise<Array<{path: string, content: string}>> {
+    const files: Array<{path: string, content: string}> = [];
+    
+    async function scanDirectory(dir: string) {
+        try {
+            const entries = fs.readdirSync(dir, { withFileTypes: true });
+            
+            for (const entry of entries) {
+                const fullPath = path.join(dir, entry.name);
+                
+                if (entry.isDirectory()) {
+                    await scanDirectory(fullPath);
+                } else if (entry.name.endsWith('.talon-list')) {
+                    try {
+                        const content = fs.readFileSync(fullPath, 'utf8');
+                        files.push({ path: fullPath, content });
+                    } catch (err) {
+                        console.error(`Failed to read list file ${fullPath}:`, err);
                     }
                 }
             }
@@ -524,30 +616,48 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
             <button id="refreshBtn" class="toolbar-btn">Refresh Index</button>
         </div>
         
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search commands, scripts, or applications..." />
-            <select id="searchScope">
-                <option value="2">All (Commands + Scripts + Lists)</option>
-                <option value="0">Command Names Only</option>
-                <option value="1">Scripts Only</option>
-            </select>
+        <div class="tabs">
+            <button class="tab-button active" data-tab="commands">Commands</button>
+            <button class="tab-button" data-tab="lists">Lists</button>
         </div>
-
-        <div class="filters">
-            <select id="filterApplication">
-                <option value="">All Applications</option>
-            </select>
-            <select id="filterMode">
-                <option value="">All Modes</option>
-            </select>
-            <select id="filterRepository">
-                <option value="">All Repositories</option>
-            </select>
-        </div>
-
-        <div id="stats" class="stats"></div>
         
-        <div id="results" class="results"></div>
+        <div id="commandsTab" class="tab-content active">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search commands, scripts, or applications..." />
+                <select id="searchScope">
+                    <option value="2">All (Commands + Scripts + Lists)</option>
+                    <option value="0">Command Names Only</option>
+                    <option value="1">Scripts Only</option>
+                </select>
+            </div>
+
+            <div class="filters">
+                <select id="filterApplication">
+                    <option value="">All Applications</option>
+                </select>
+                <select id="filterMode">
+                    <option value="">All Modes</option>
+                </select>
+                <select id="filterRepository">
+                    <option value="">All Repositories</option>
+                </select>
+            </div>
+
+            <div id="stats" class="stats"></div>
+            
+            <div id="results" class="results"></div>
+        </div>
+        
+        <div id="listsTab" class="tab-content">
+            <div class="search-box">
+                <input type="text" id="listSearchInput" placeholder="Search list names, spoken forms, values, or source files..." />
+                <button id="clearListSearch" class="clear-search-btn" title="Clear search">✖</button>
+            </div>
+            
+            <div id="listStats" class="stats"></div>
+            
+            <div id="listResults" class="results"></div>
+        </div>
     </div>
 
     <script src="${scriptUri}"></script>

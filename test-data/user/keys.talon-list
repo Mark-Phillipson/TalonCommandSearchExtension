@@ -1,0 +1,14 @@
+left: left
+right: right
+up: up
+down: down
+page up: pageup
+page down: pagedown
+home: home
+end: end
+tab: tab
+enter: enter
+escape: escape
+backspace: backspace
+delete: delete
+space: space
