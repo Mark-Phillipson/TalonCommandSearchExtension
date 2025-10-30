@@ -16,6 +16,8 @@
 - **📂 File Integration**: Click any result to open the source .talon file instantly
 - **⌨️ Keyboard Shortcuts**: `Ctrl+Shift+T` (Windows/Linux) or `Cmd+Shift+T` (Mac)
 - **📈 Real-time Stats**: Live command count and repository statistics
+- **🔧 Folder Management**: Set custom Talon user folder paths and import from any directory
+- **🛠️ Database Tools**: Built-in database management with clear/check functionality
 
 ## 🏗️ Architecture & Performance
 
@@ -44,10 +46,19 @@
 ```json
 {
   "talonSearch.userFolderPath": "",           // 📁 Leave empty for auto-detection
-  "talonSearch.enableAutoIndexing": true,     // 🔄 Auto-import on startup
+  "talonSearch.enableAutoIndexing": true,     // 🔄 Auto-import on startup  
   "talonSearch.maxSearchResults": 500         // 📊 Max results per search
 }
 ```
+
+### 🔧 Configuration Details
+
+- **User Folder Path**: Auto-detects standard Talon locations:
+  - Windows: `%APPDATA%\talon\user` 
+  - Mac: `~/.talon/user`
+  - Linux: `~/.talon/user`
+- **Auto Indexing**: Automatically imports commands on VS Code startup
+- **Max Results**: Prevents UI slowdown with large result sets (default: 500)
 
 ## 👨‍💻 Development
 
@@ -71,37 +82,101 @@ npm run watch
 - **📝 Parser** (`src/parser/talonFileParser.ts`): Advanced Talon file parsing (headers, commands, scripts)
 - **🖥️ Webview UI** (`webview/`): Modern search interface with real-time filtering and stats
 - **📊 Data Models** (`src/types.ts`): TypeScript interfaces ensuring type safety
+- **🎨 Modern UI** (`webview/styles.css`): CSS Grid responsive layout with VS Code theming
 
 **🔄 Evolution**: Started with SQLite → Tried IndexedDB → Perfected with JSON + In-Memory for optimal performance!
+
+### 🏗️ Key Technical Improvements
+
+- **Responsive Design**: CSS Grid automatically adapts to screen size (3/2/1 columns)
+- **In-Memory Search**: All filtering and search operations run in memory for instant results
+- **Repository Intelligence**: Smart path parsing extracts repository info from file paths
+- **Additive Imports**: Support both full refresh and incremental folder imports
+- **Database Isolation**: Commands stored in extension global storage, workspace-independent
+
+## 🆕 Recent Updates (Latest)
+
+### 🎨 Enhanced UI & User Experience
+- **CSS Grid Layout**: Modern responsive design with automatic 3-column layout
+- **Improved Results Display**: Cards now use optimal grid spacing for better readability
+- **Interactive Repository Stats**: Click on any repository in the breakdown to instantly filter results
+- **Visual Filter Feedback**: Selected repositories are visually highlighted in the stats
+
+### 🛠️ Database Management Tools
+- **Check Database**: New toolbar button to inspect database status and location
+- **Clear Database**: Safe database clearing with confirmation dialogs
+- **Better Error Handling**: Improved feedback when database isn't initialized
+
+### 📁 Flexible Folder Management
+- **Set User Folder**: New command to configure your Talon user folder path
+- **Import from Folder**: Import commands from any directory (additive to existing commands)
+- **Refresh vs Import**: Clear distinction between refreshing (replace all) and importing (add to existing)
+
+### 📦 Publishing & Distribution
+- **Complete Publishing Guide**: Step-by-step marketplace publishing documentation
+- **VSCE Integration**: Ready-to-publish package with proper configuration
+- **Professional Documentation**: Comprehensive setup and usage instructions
+
+## 🚀 Quick Start
 
 ## 🎮 Available Commands
 
 - **🔍 `Talon: Search Commands`** - Open the powerful search panel
 - **🔄 `Talon: Refresh Index`** - Re-import all .talon files (with progress indicator)
-- **📁 `Talon: Browse Lists`** - Import commands from a custom folder
+- **📁 `Talon: Import from Folder`** - Import commands from a custom folder (additive)
+- **⚙️ `Talon: Set User Folder Path`** - Configure your Talon user folder location
 
 ## 🗺️ Roadmap & Future Features
 
 - [x] **✅ Repository Breakdown** - See command distribution across repositories
-- [x] **✅ Horizontal Stats Layout** - Space-efficient command statistics
+- [x] **✅ Horizontal Stats Layout** - Space-efficient command statistics  
 - [x] **✅ JSON Storage Migration** - Solved native module compilation issues
 - [x] **✅ Real-time Search** - Lightning-fast search with 27k+ commands
+- [x] **✅ CSS Grid Layout** - Responsive 3-column results layout
+- [x] **✅ Database Management** - Built-in tools for clearing and checking database
+- [x] **✅ Folder Management** - Custom folder selection and import workflows
+- [x] **✅ Enhanced Filtering** - Clickable repository stats and dynamic filtering
+- [x] **✅ Publishing Ready** - Complete publishing guide and marketplace preparation
 - [ ] **🔮 List Parsing** - Support for Talon list files (.talon-list)
 - [ ] **🌳 TreeView** - Hierarchical browsing of results
 - [ ] **🧠 Semantic Search** - AI-powered command discovery
-- [ ] **🎨 Enhanced UI** - More filtering options and better UX
 - [ ] **👀 File Watcher** - Auto-refresh when .talon files change
 - [ ] **📈 Usage Analytics** - Track most-used commands
 
 ## 🎉 What's New in This Version
 
 - **🚀 Performance Revolution**: Migrated from SQLite to optimized JSON storage
-- **📊 Repository Insights**: See exactly where your commands come from
-- **🎨 Space-Efficient UI**: Horizontal repository breakdown saves screen space
+- **📊 Repository Insights**: See exactly where your commands come from with clickable stats
+- **🎨 Modern UI**: CSS Grid layout with responsive 3-column design
+- **🛠️ Database Tools**: Built-in database management (check/clear with confirmation dialogs)
+- **📁 Flexible Imports**: New commands for setting user folder and importing from any directory
 - **⚡ Zero Dependencies**: No more native module compilation issues
 - **🔧 Windows Compatible**: Solved all the pesky Node.js version conflicts
 - **📈 Scalable**: Tested with 27,000+ commands and counting!
+- **📦 Publishing Ready**: Complete marketplace publishing guide included
 
-## 📝 License
+## � Publishing & Distribution
+
+This extension is ready for VS Code Marketplace publication! A comprehensive publishing guide is included:
+
+- **📋 Complete Setup**: Step-by-step Azure DevOps and Personal Access Token configuration
+- **🔧 VSCE Integration**: All package.json settings configured for publishing
+- **📝 Documentation**: Professional README and marketplace-ready descriptions
+- **🚀 One-Command Publishing**: `vsce publish patch` for streamlined releases
+- **🔒 Security Best Practices**: Token management and security guidelines included
+
+See [`PUBLISHING.md`](./PUBLISHING.md) for the complete publishing guide.
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how to get started:
+
+1. **🍴 Fork** the repository
+2. **🔧 Setup**: Run `npm install` and `npm run compile`
+3. **🧪 Test**: Press F5 to launch extension development host
+4. **✨ Develop**: Make your changes and test thoroughly
+5. **📤 Submit**: Create a pull request with your improvements
+
+## �📝 License
 
 MIT - Feel free to contribute and make Talon Voice even better! 🎯
