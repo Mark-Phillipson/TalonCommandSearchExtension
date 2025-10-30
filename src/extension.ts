@@ -53,30 +53,72 @@ export async function activate(context: vscode.ExtensionContext) {
                 vscode.window.showInformationMessage('Talon command index refreshed');
             } else {
                 const result = await vscode.window.showErrorMessage(
-                    'Talon user folder not found. Please select manually or configure talonSearch.userFolderPath',
-                    'Select Folder'
+                    `Talon user folder not found. Expected location: ${process.env.APPDATA}\\talon\\user\n\nPlease set your Talon user folder path manually.`,
+                    'Set Talon Folder',
+                    'Import from Other Folder'
                 );
-                if (result === 'Select Folder') {
+                if (result === 'Set Talon Folder') {
+                    await vscode.commands.executeCommand('talon.setUserFolder');
+                } else if (result === 'Import from Other Folder') {
                     await vscode.commands.executeCommand('talon.openListExplorer');
                 }
             }
         })
     );
 
-    // Register: Talon: Browse Lists (currently opens folder picker for import)
+    // Register: Talon: Import from Folder (opens folder picker for additive import)
     context.subscriptions.push(
         vscode.commands.registerCommand('talon.openListExplorer', async () => {
+            // Try to default to the Talon user folder
+            const defaultPath = await autoDetectTalonPath();
+            const defaultUri = defaultPath ? vscode.Uri.file(defaultPath) : undefined;
+            
             const folderUri = await vscode.window.showOpenDialog({
                 canSelectFolders: true,
                 canSelectFiles: false,
                 canSelectMany: false,
                 title: 'Select Talon User Folder',
-                openLabel: 'Import'
+                openLabel: 'Import',
+                defaultUri: defaultUri
             });
 
             if (folderUri && folderUri[0]) {
-                await importTalonFiles(context, folderUri[0].fsPath);
+                await importTalonFiles(context, folderUri[0].fsPath, false); // false = additive import, don't clear existing
                 vscode.window.showInformationMessage('Import complete');
+            }
+        })
+    );
+
+    // Register: Talon: Set User Folder Path
+    context.subscriptions.push(
+        vscode.commands.registerCommand('talon.setUserFolder', async () => {
+            const currentPath = vscode.workspace.getConfiguration('talonSearch').get<string>('userFolderPath');
+            const detectedPath = await autoDetectTalonPath();
+            
+            const folderUri = await vscode.window.showOpenDialog({
+                canSelectFolders: true,
+                canSelectFiles: false,
+                canSelectMany: false,
+                title: 'Select Your Talon User Folder',
+                openLabel: 'Set as Talon User Folder',
+                defaultUri: currentPath ? vscode.Uri.file(currentPath) : 
+                           detectedPath ? vscode.Uri.file(detectedPath) : undefined
+            });
+
+            if (folderUri && folderUri[0]) {
+                const selectedPath = folderUri[0].fsPath;
+                const config = vscode.workspace.getConfiguration('talonSearch');
+                await config.update('userFolderPath', selectedPath, vscode.ConfigurationTarget.Global);
+                
+                const result = await vscode.window.showInformationMessage(
+                    `Talon user folder set to: ${selectedPath}\n\nWould you like to refresh the index now?`,
+                    'Refresh Index',
+                    'Later'
+                );
+                
+                if (result === 'Refresh Index') {
+                    await vscode.commands.executeCommand('talon.refreshIndex');
+                }
             }
         })
     );
@@ -96,13 +138,19 @@ export async function activate(context: vscode.ExtensionContext) {
         }
         if (talonPath && fs.existsSync(talonPath)) {
             console.log('Starting background import from:', talonPath);
-            // Import in background without blocking activation
-            importTalonFiles(context, talonPath).catch(err => {
+            // Import in background without blocking activation (refresh = clear existing first)
+            importTalonFiles(context, talonPath, true).catch(err => {
                 console.error('Background import failed:', err);
                 vscode.window.showErrorMessage(`Failed to import Talon files: ${err.message}`);
             });
         } else {
             console.log('Talon path not found or does not exist:', talonPath);
+            console.log('Environment info:', {
+                platform: process.platform,
+                APPDATA: process.env.APPDATA,
+                USERPROFILE: process.env.USERPROFILE,
+                HOME: process.env.HOME
+            });
         }
     } else {
         console.log('Auto-indexing is disabled');
@@ -300,7 +348,7 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
     });
 }
 
-async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: string) {
+async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: string, isRefresh: boolean = true) {
     console.log('importTalonFiles called with rootFolder:', rootFolder);
     return vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
@@ -338,20 +386,33 @@ async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: st
             }
         }
 
-        progress.report({ increment: 80, message: `Saving ${allCommands.length} commands to database...` });
+        if (isRefresh) {
+            progress.report({ increment: 80, message: `Refreshing database with ${allCommands.length} commands (clearing old ones)...` });
 
-        // Insert into SQLite
-        console.log(`Inserting ${allCommands.length} commands into database`);
-        db.insertCommandsBatch(allCommands);
+            // Clear existing commands and insert new ones to avoid duplicates
+            console.log(`Refreshing database with ${allCommands.length} commands (clearing existing first)`);
+            db.refreshCommandsBatch(allCommands);
 
-        const totalCount = db.getCommandCount();
-        console.log(`Import complete. Total commands in database: ${totalCount}`);
-        progress.report({ increment: 100, message: "Import complete" });
+            console.log(`Refresh complete. Total commands in database: ${db.getCommandCount()}`);
+            progress.report({ increment: 100, message: "Refresh complete" });
 
-        vscode.window.showInformationMessage(`Imported ${allCommands.length} commands. Total in database: ${totalCount}`);
+            vscode.window.showInformationMessage(`Refreshed index with ${allCommands.length} commands. Total in database: ${db.getCommandCount()}`);
+        } else {
+            progress.report({ increment: 80, message: `Adding ${allCommands.length} commands to database...` });
+
+            // Add commands to existing ones
+            console.log(`Adding ${allCommands.length} commands to database`);
+            db.insertCommandsBatch(allCommands);
+
+            console.log(`Import complete. Total commands in database: ${db.getCommandCount()}`);
+            progress.report({ increment: 100, message: "Import complete" });
+
+            vscode.window.showInformationMessage(`Added ${allCommands.length} commands. Total in database: ${db.getCommandCount()}`);
+        }
 
         // Update webview if open
         if (searchPanel) {
+            const totalCount = db.getCommandCount();
             const filters = db.getFilterValues();
             const repositoryBreakdown = db.getRepositoryBreakdown();
             searchPanel.webview.postMessage({
@@ -414,20 +475,32 @@ async function autoDetectTalonPath(): Promise<string | undefined> {
     const isMac = process.platform === 'darwin';
     
     const possiblePaths = isWindows ? [
+        // Primary Windows path using APPDATA
         path.join(process.env.APPDATA || '', 'talon', 'user'),
-        path.join(process.env.USERPROFILE || '', 'AppData', 'Roaming', 'talon', 'user')
+        // Alternative Windows path using USERPROFILE
+        path.join(process.env.USERPROFILE || '', 'AppData', 'Roaming', 'talon', 'user'),
+        // Legacy paths (in case someone has older installations)
+        path.join(process.env.USERPROFILE || '', '.talon', 'user')
     ] : isMac ? [
-        path.join(process.env.HOME || '', '.talon', 'user')
+        path.join(process.env.HOME || '', '.talon', 'user'),
+        path.join(process.env.HOME || '', 'talon', 'user')
     ] : [
-        path.join(process.env.HOME || '', '.talon', 'user')
+        // Linux paths
+        path.join(process.env.HOME || '', '.talon', 'user'),
+        path.join(process.env.HOME || '', 'talon', 'user')
     ];
 
+    console.log('Checking Talon paths:', possiblePaths);
+    
     for (const testPath of possiblePaths) {
+        console.log(`Checking path: ${testPath}`);
         if (fs.existsSync(testPath)) {
+            console.log(`Found Talon user folder at: ${testPath}`);
             return testPath;
         }
     }
 
+    console.log('No Talon user folder found in standard locations');
     return undefined;
 }
 

@@ -77,6 +77,26 @@ export class SqliteManager {
         this.saveToFile();
     }
 
+    public refreshCommandsBatch(commands: Array<Omit<TalonVoiceCommand, 'id'>>): void {
+        // Clear existing commands before inserting new ones to avoid duplicates
+        console.log(`Clearing ${this.commands.length} existing commands before refresh`);
+        this.commands = [];
+        this.nextId = 1;
+        
+        // Insert new commands
+        for (const cmd of commands) {
+            const newCommand: TalonVoiceCommand = {
+                ...cmd,
+                id: this.nextId++,
+                application: cmd.application || 'global',
+                createdAt: cmd.createdAt || new Date().toISOString()
+            };
+            this.commands.push(newCommand);
+        }
+        this.saveToFile();
+        console.log(`Refresh complete: imported ${commands.length} commands`);
+    }
+
     public searchCommands(
         searchTerm: string,
         searchScope: number,

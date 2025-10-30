@@ -35,7 +35,11 @@
       },
       {
         "command": "talon.openListExplorer",
-        "title": "Talon: Browse Lists"
+        "title": "Talon: Import from Folder"
+      },
+      {
+        "command": "talon.setUserFolder",
+        "title": "Talon: Set User Folder Path"
       }
     ],
     "configuration": {
@@ -44,7 +48,7 @@
         "talonSearch.userFolderPath": {
           "type": "string",
           "default": "",
-          "description": "Path to Talon user folder (leave empty for auto-detection)"
+          "description": "Path to Talon user folder. Leave empty for auto-detection. Typically: %APPDATA%\\talon\\user on Windows, ~/.talon/user on Mac/Linux"
         },
         "talonSearch.enableAutoIndexing": {
           "type": "boolean",
