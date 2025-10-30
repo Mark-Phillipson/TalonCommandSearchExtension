@@ -260,6 +260,9 @@
     function init() {
         console.log('[Init] Initializing webview...');
         
+        // Setup event listeners
+        setupEventListeners();
+        
         // Request initial stats
         vscode.postMessage({ command: 'getStats' });
         
@@ -271,33 +274,98 @@
         }, 500);
     }
 
-    // Event listeners
-    document.getElementById('searchInput')?.addEventListener('input', performSearch);
-    
-    document.getElementById('searchScope')?.addEventListener('change', performSearch);
-    
-    document.getElementById('filterApplication')?.addEventListener('change', performSearch);
-    document.getElementById('filterMode')?.addEventListener('change', performSearch);
-    document.getElementById('filterRepository')?.addEventListener('change', (e) => {
-        const selectedRepo = e.target.value;
-        updateRepositoryHighlight(selectedRepo);
-        performSearch();
-    });
-
-    // Toolbar button handlers
-    document.getElementById('checkDbBtn')?.addEventListener('click', () => {
-        alert(`Database contains ${totalCommands} commands.\n\nDatabase: SQLite (better-sqlite3)\nLocation: Extension global storage`);
-    });
-
-    document.getElementById('clearDbBtn')?.addEventListener('click', () => {
-        if (confirm('Are you sure you want to clear all imported commands? This cannot be undone.')) {
-            vscode.postMessage({ command: 'clearDatabase' });
+    // Setup event listeners (moved to a function to be called after DOM is ready)
+    function setupEventListeners() {
+        console.log('[Init] Setting up event listeners...');
+        
+        // Search and filter event listeners
+        const searchInput = document.getElementById('searchInput');
+        const searchScope = document.getElementById('searchScope');
+        const filterApplication = document.getElementById('filterApplication');
+        const filterMode = document.getElementById('filterMode');
+        const filterRepository = document.getElementById('filterRepository');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', performSearch);
+            console.log('[Init] Search input listener attached');
         }
-    });
+        
+        if (searchScope) {
+            searchScope.addEventListener('change', performSearch);
+            console.log('[Init] Search scope listener attached');
+        }
+        
+        if (filterApplication) {
+            filterApplication.addEventListener('change', performSearch);
+            console.log('[Init] Application filter listener attached');
+        }
+        
+        if (filterMode) {
+            filterMode.addEventListener('change', performSearch);
+            console.log('[Init] Mode filter listener attached');
+        }
+        
+        if (filterRepository) {
+            filterRepository.addEventListener('change', (e) => {
+                const selectedRepo = e.target.value;
+                updateRepositoryHighlight(selectedRepo);
+                performSearch();
+            });
+            console.log('[Init] Repository filter listener attached');
+        }
 
-    document.getElementById('refreshBtn')?.addEventListener('click', () => {
-        vscode.postMessage({ command: 'triggerRefresh' });
-    });
+        // Toolbar button handlers
+        const checkDbBtn = document.getElementById('checkDbBtn');
+        const clearDbBtn = document.getElementById('clearDbBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        
+        if (checkDbBtn) {
+            checkDbBtn.addEventListener('click', () => {
+                console.log('[CheckDB] Button clicked, totalCommands:', totalCommands);
+                
+                // Send message to extension to show info via VS Code notification
+                vscode.postMessage({ 
+                    command: 'showInfo', 
+                    message: `Database contains ${totalCommands} commands.\n\nDatabase: JSON file storage\nLocation: Extension global storage`
+                });
+            });
+            console.log('[Init] Check DB button handler attached');
+        } else {
+            console.error('[Init] Check DB button not found!');
+        }
+
+        if (clearDbBtn) {
+            clearDbBtn.addEventListener('click', () => {
+                console.log('[ClearDB] Button clicked, totalCommands:', totalCommands);
+                if (totalCommands === 0) {
+                    vscode.postMessage({ 
+                        command: 'showInfo', 
+                        message: 'Database is already empty.'
+                    });
+                    return;
+                }
+                
+                // Send message to extension to show confirmation dialog via VS Code
+                vscode.postMessage({ 
+                    command: 'confirmClearDatabase', 
+                    commandCount: totalCommands 
+                });
+            });
+            console.log('[Init] Clear DB button handler attached');
+        } else {
+            console.error('[Init] Clear DB button not found!');
+        }
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                console.log('[RefreshBtn] Button clicked');
+                vscode.postMessage({ command: 'triggerRefresh' });
+            });
+            console.log('[Init] Refresh button handler attached');
+        } else {
+            console.error('[Init] Refresh button not found!');
+        }
+    }
 
     // Handle messages from extension
     window.addEventListener('message', (event) => {
@@ -341,6 +409,12 @@
         }
     });
 
-    // Initialize on load
-    init();
+    // Initialize on load - ensure DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+        console.log('[Init] Waiting for DOMContentLoaded...');
+    } else {
+        console.log('[Init] DOM already ready, initializing immediately');
+        init();
+    }
 })();

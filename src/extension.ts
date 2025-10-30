@@ -209,23 +209,7 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             repositoryBreakdown: repositoryBreakdown
                         });
                         break;
-                    case 'clearDatabase':
-                        if (!db) {
-                            searchPanel?.webview.postMessage({
-                                command: 'error',
-                                message: 'Database not initialized. Please reload the window.'
-                            });
-                            break;
-                        }
-                        db.clearAllCommands();
-                        searchPanel?.webview.postMessage({
-                            command: 'stats',
-                            totalCommands: 0,
-                            filters: { applications: [], modes: [], repositories: [], operatingSystems: [] },
-                            repositoryBreakdown: {}
-                        });
-                        vscode.window.showInformationMessage('Database cleared');
-                        break;
+
                     case 'openFile':
                         await openTalonFile(message.filePath);
                         break;
@@ -235,6 +219,41 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                         break;
                     case 'triggerRefresh':
                         await vscode.commands.executeCommand('talon.refreshIndex');
+                        break;
+                    case 'showInfo':
+                        vscode.window.showInformationMessage(message.message);
+                        break;
+                    case 'confirmClearDatabase':
+                        const result = await vscode.window.showWarningMessage(
+                            `Are you sure you want to clear all ${message.commandCount} imported commands? This cannot be undone.`,
+                            { modal: true },
+                            'Clear Database'
+                        );
+                        if (result === 'Clear Database') {
+                            if (!db) {
+                                vscode.window.showErrorMessage('Database not initialized. Please reload the window.');
+                                break;
+                            }
+                            const commandCount = db.getCommandCount();
+                            db.clearAllCommands();
+                            console.log(`[ClearDatabase] Cleared ${commandCount} commands from database`);
+                            
+                            // Update webview with empty stats
+                            searchPanel?.webview.postMessage({
+                                command: 'stats',
+                                totalCommands: 0,
+                                filters: { applications: [], modes: [], repositories: [], operatingSystems: [] },
+                                repositoryBreakdown: {}
+                            });
+                            
+                            // Clear search results
+                            searchPanel?.webview.postMessage({
+                                command: 'searchResults',
+                                results: []
+                            });
+                            
+                            vscode.window.showInformationMessage(`Database cleared - removed ${commandCount} commands`);
+                        }
                         break;
                     case 'log':
                         console.log('[Webview]', message.text);
@@ -418,7 +437,7 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' vscode-resource:; script-src vscode-resource:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' vscode-resource:; script-src vscode-resource: 'unsafe-eval';">
     <link href="${styleUri}" rel="stylesheet">
     <title>Talon Command Search</title>
 </head>
