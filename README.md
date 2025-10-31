@@ -1,11 +1,17 @@
 # 🔍 Search Talon Commands - VS Code Extension
 
-🎯 Search and browse 27,000+ Talon Voice commands and lists with lightning-fast performance and advanced filtering.
+🎯 Search and browse 27,000+ Talon Voice commands and lists with lightning-fast performance, advanced filtering, and dedicated list search capabilities.
 
 ## ✨ Features
 
 - **⚡ Lightning Fast JSON Storage**: Handles massive datasets (27k+ commands) with optimized in-memory search
 - **🔎 Intelligent Search**: Instant search across commands, scripts, applications, and metadata
+- **📑 Dedicated List Search**: Brand new tabbed interface with dedicated Talon list (.talon-list) search
+  - 🎯 Separate "Commands" and "Lists" tabs for focused searching
+  - 📊 Search across list names, spoken forms, values, and source files
+  - 🎪 Grouped results by list name for better organization
+  - 📝 Table format showing spoken form → list value mappings
+  - 🔍 Collapsible available lists section with click-to-filter functionality
 - **🎛️ Advanced Filtering**: Filter by application, mode, repository with real-time results
 - **📊 Repository Breakdown**: See command distribution across your repositories (community, personal, etc.)
 - **🎯 Multiple Search Scopes**: 
@@ -18,9 +24,9 @@
   - 🔗 Automatically maps command placeholders to actual Talon lists
   - ✨ Works with complex list naming structures and repository paths
 - **🤖 Auto-Detection**: Automatically finds your Talon user folder on Windows/Mac/Linux
-- **📂 File Integration**: Click any result to open the source .talon file instantly
+- **📂 File Integration**: Click any result to open source .talon or .talon-list files instantly
 - **⌨️ Keyboard Shortcuts**: `Ctrl+Shift+T` (Windows/Linux) or `Cmd+Shift+T` (Mac)
-- **📈 Real-time Stats**: Live command count and repository statistics
+- **📈 Real-time Stats**: Live command count, list count, and repository statistics
 - **🔧 Folder Management**: Set custom Talon user folder paths and import from any directory
 - **🛠️ Database Tools**: Built-in database management with clear/check functionality
 
@@ -66,14 +72,44 @@ The **Intelligent List Matching** feature revolutionizes command discovery by le
 
 This feature makes it incredibly easy to discover commands when you know what you want to do but don't know the exact command name!
 
-## 🚀 Quick Start
+## � Dedicated List Search
+
+The extension now includes a complete **List Search** interface for browsing and searching through your Talon list files (.talon-list).
+
+### ✨ Key Features
+
+- **📑 Separate Tab**: Dedicated "Lists" tab alongside "Commands" for focused searching
+- **🔍 Multi-field Search**: Search across list names, spoken forms, values, and source files
+- **🎪 Organized Results**: Results grouped by list name (e.g., user.emoji, user.keys) for better navigation
+- **📝 Clean Display**: Table format showing "spoken form → list value" mappings
+- **🎯 Click-to-Filter**: Click any available list name to filter results to that specific list
+- **📋 Collapsible Interface**: Space-saving design with expandable available lists section
+- **📂 File Integration**: Click source file names to open .talon-list files directly
+
+### 🎯 How to Use List Search
+
+1. **Open Search**: Use `Ctrl+Shift+T` or "Talon: Search Commands"
+2. **Switch to Lists**: Click the "Lists" tab in the interface
+3. **Search Lists**: Type in the search box to find specific list items
+4. **Filter by List**: Click any list name in the "Available Lists" section to filter
+5. **Open Files**: Click source file names to edit your .talon-list files
+
+### 📊 Example Use Cases
+
+- **Find Emoji**: Search "happy" to see all happy-related emojis in your emoji lists
+- **Browse Keys**: Click "user.keys" to see all available key mappings
+- **Check Snippets**: Search "print" to find all print-related code snippets
+- **Verify Lists**: Quickly verify what values are available in specific lists
+
+## �🚀 Quick Start
 
 1. **📦 Install the extension**
 2. **🎯 Open Command Palette** (`Ctrl+Shift+P` / `Cmd+Shift+P`)
-3. **🔄 Run**: `Talon: Refresh Index` (first time only - imports your commands)
+3. **🔄 Run**: `Talon: Refresh Index` (first time only - imports your commands and lists)
 4. **🔍 Search**: `Talon: Search Commands` or use `Ctrl+Shift+T`
 5. **📊 Enjoy**: See your command breakdown and start searching instantly!
-6. **🧠 Try List Matching**: Search for values like "left", "chrome", or "happy" to see the magic!
+6. **📑 Try List Search**: Click the "Lists" tab to search through your Talon list files
+7. **🧠 Try List Matching**: Search for values like "left", "chrome", or "happy" to see the magic!
 
 ## ⚙️ Configuration
 
@@ -130,7 +166,17 @@ npm run watch
 
 ## 🆕 Recent Updates (Latest)
 
-### 🧠 Revolutionary List Matching (NEW!)
+### 📑 Revolutionary Talon List Search (NEW!)
+- **🎯 Dedicated List Search Tab**: Complete separate interface for searching Talon lists (.talon-list files)
+- **📊 Comprehensive List Parsing**: Full support for parsing .talon-list files with spoken_form: list_value format
+- **🎪 Grouped Results Display**: Search results organized by list name for better navigation
+- **📝 Table Format**: Clean display showing spoken form → list value mappings
+- **🔍 Multi-field Search**: Search across list names, spoken forms, values, and source files
+- **🎯 Click-to-Filter**: Click any list name to instantly filter results to that specific list
+- **📋 Collapsible Lists Section**: Space-saving UI with expandable available lists section
+- **🧠 Voice-Friendly Design**: Optimized for voice users with minimal scrolling required
+
+### 🧠 Enhanced List Matching Intelligence
 - **🎯 Intelligent List Value Search**: Find commands by searching for the values they accept
 - **🔍 Smart Placeholder Mapping**: Automatically maps `<user.arrow_key>` to actual lists like `user.community/core/keys/arrow_key`  
 - **✨ Enhanced Command Discovery**: Search "left" to find all commands that use arrow keys
@@ -139,16 +185,19 @@ npm run watch
 - **📊 Works Across All Scopes**: List matching available in Command Names Only and All search scopes
 
 ### 🎨 Enhanced UI & User Experience
+- **📑 Tabbed Interface**: Separate "Commands" and "Lists" tabs for focused searching
 - **CSS Grid Layout**: Modern responsive design with automatic 3-column layout
 - **Improved Results Display**: Cards now use optimal grid spacing for better readability
 - **Interactive Repository Stats**: Click on any repository in the breakdown to instantly filter results
 - **Visual Filter Feedback**: Selected repositories are visually highlighted in the stats
 - **🔄 Stable Results**: Fixed issue where search results would sometimes disappear
+- **✖️ Clear Search Button**: Quick search reset functionality for both tabs
 
 ### 🛠️ Database Management Tools
 - **Check Database**: New toolbar button to inspect database status and location
 - **Clear Database**: Safe database clearing with confirmation dialogs
 - **Better Error Handling**: Improved feedback when database isn't initialized
+- **📊 Enhanced Import Process**: Now imports both .talon and .talon-list files in single operation
 
 ### 📁 Flexible Folder Management
 - **Set User Folder**: New command to configure your Talon user folder path
@@ -164,9 +213,9 @@ npm run watch
 
 ## 🎮 Available Commands
 
-- **🔍 `Talon: Search Commands`** - Open the powerful search panel
-- **🔄 `Talon: Refresh Index`** - Re-import all .talon files (with progress indicator)
-- **📁 `Talon: Import from Folder`** - Import commands from a custom folder (additive)
+- **🔍 `Talon: Search Commands`** - Open the powerful search panel with Commands and Lists tabs
+- **🔄 `Talon: Refresh Index`** - Re-import all .talon and .talon-list files (with progress indicator)
+- **📁 `Talon: Import from Folder`** - Import commands and lists from a custom folder (additive)
 - **⚙️ `Talon: Set User Folder Path`** - Configure your Talon user folder location
 
 ## 🗺️ Roadmap & Future Features
@@ -181,21 +230,31 @@ npm run watch
 - [x] **✅ Enhanced Filtering** - Clickable repository stats and dynamic filtering
 - [x] **✅ Publishing Ready** - Complete publishing guide and marketplace preparation
 - [x] **✅ List Parsing & Matching** - Full support for Talon list files (.talon-list) with intelligent command matching
+- [x] **✅ Dedicated List Search** - Complete tabbed interface with separate list search functionality
+- [x] **✅ Collapsible UI** - Space-saving interface optimized for voice users
+- [x] **✅ Click-to-Filter Lists** - Interactive list name filtering for focused searching
 - [ ] **🌳 TreeView** - Hierarchical browsing of results
 - [ ] **🧠 Semantic Search** - AI-powered command discovery
 - [ ] **👀 File Watcher** - Auto-refresh when .talon files change
 - [ ] **📈 Usage Analytics** - Track most-used commands
+- [ ] **🔗 Cross-Reference Search** - Show which commands use specific lists
+- [ ] **✏️ Inline List Editing** - Edit list items directly in the interface
 
 ## 🎉 What's New in This Version
 
-- **🚀 Performance Revolution**: Migrated from SQLite to optimized JSON storage
+- **� Revolutionary List Search**: Complete tabbed interface with dedicated Talon list search functionality
+- **🎯 Intelligent List Parsing**: Full support for .talon-list files with comprehensive search capabilities
+- **🎪 Organized Results**: Grouped list results by list name with clean table formatting
+- **🔍 Enhanced Filtering**: Click-to-filter list names with collapsible interface design
+- **�🚀 Performance Revolution**: Migrated from SQLite to optimized JSON storage
 - **📊 Repository Insights**: See exactly where your commands come from with clickable stats
-- **🎨 Modern UI**: CSS Grid layout with responsive 3-column design
+- **🎨 Modern UI**: CSS Grid layout with responsive 3-column design and tabbed navigation
 - **🛠️ Database Tools**: Built-in database management (check/clear with confirmation dialogs)
 - **📁 Flexible Imports**: New commands for setting user folder and importing from any directory
 - **⚡ Zero Dependencies**: No more native module compilation issues
 - **🔧 Windows Compatible**: Solved all the pesky Node.js version conflicts
-- **📈 Scalable**: Tested with 27,000+ commands and counting!
+- **📈 Scalable**: Tested with 27,000+ commands and thousands of list items!
+- **🗣️ Voice-Optimized**: UI designed specifically for voice users with minimal scrolling required
 - **📦 Publishing Ready**: Complete marketplace publishing guide included
 
 ## � Publishing & Distribution
