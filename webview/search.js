@@ -89,7 +89,7 @@
                     {
                         name: "user.letter",
                         type: "list",
-                        description: "NATO phonetic alphabet for spelling",
+                        description: "Default Talon phonetic alphabet for letters (your configuration may differ)",
                         examples: [
                             { spoken: "air", description: "Type letter 'a'" },
                             { spoken: "bat", description: "Type letter 'b'" },
