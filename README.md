@@ -132,8 +132,10 @@ The extension now includes a complete **List Search** interface for browsing and
 - **Max Results**: Prevents UI slowdown with large result sets (default: 500)
 - **Search Debounce**: Configurable delay before performing search (default: 3000ms)
   - ⏱️ Prevents searches on every keystroke for better performance
-  - 🎯 Adjustable from 0ms (instant) to 30 seconds
+  - 🎯 Adjustable from 0ms (instant) to 30 seconds via VS Code settings
+  - 🎨 Visual feedback with orange pending indicator and countdown
   - 💡 Recommended: 1000-3000ms for optimal user experience
+  - 🚀 Includes race condition prevention for smooth search experience
 
 ## 👨‍💻 Development
 
@@ -163,6 +165,9 @@ npm run watch
 
 ### 🏗️ Key Technical Improvements
 
+- **Smart Focus Management**: Automatic focus handling for optimal voice user experience  
+- **Configurable Search Debounce**: Performance-tuned search delays with visual feedback system
+- **Advanced Filtering Architecture**: Multi-dimensional filtering (tags, OS, repos) with persistent state
 - **Responsive Design**: CSS Grid automatically adapts to screen size (3/2/1 columns)
 - **In-Memory Search**: All filtering and search operations run in memory for instant results
 - **Repository Intelligence**: Smart path parsing extracts repository info from file paths
@@ -171,12 +176,26 @@ npm run watch
 
 ## 🆕 Recent Updates (Latest)
 
+### 🎯 Enhanced User Experience (NEW!)
+- **⌨️ Smart Focus Management**: Automatic focus on search inputs when switching between Commands and Lists tabs
+- **🎨 Improved Tab Navigation**: Seamless switching with immediate focus for voice users
+- **🚀 Enhanced Search Performance**: Intelligent search triggers only when tab switching with available data
+- **📱 Touch-Friendly Interface**: Better click targets and responsive design elements
+- **🎭 Voice-Optimized UX**: Minimal navigation required for efficient voice command usage
+
 ### ⏱️ Configurable Search Debounce (NEW!)
 - **🎯 Smart Search Timing**: Configurable delay prevents searches on every keystroke
 - **⚙️ Fully Customizable**: Adjust delay from 0ms (instant) to 30 seconds via VS Code settings  
 - **🎨 Visual Feedback**: Orange pending indicator shows search will start with countdown
 - **🚀 Performance Optimized**: Reduces server load while maintaining responsive feel
-- **💡 Smart Defaults**: 5-second default delay balances performance and usability
+- **💡 Smart Defaults**: 3-second default delay balances performance and usability
+
+### 🔍 Advanced Filtering System (NEW!)
+- **🏷️ Tags Filter**: Filter commands by tags for better organization
+- **💻 Operating System Filter**: Filter commands by OS (Windows, Mac, Linux)
+- **📊 Enhanced Repository Stats**: More detailed breakdown with visual indicators
+- **🎯 Smart Filter Combinations**: Multiple filters work together for precise results
+- **🔄 Persistent Filter State**: Filters maintain state across searches
 
 ### 📑 Revolutionary Talon List Search (NEW!)
 - **🎯 Dedicated List Search Tab**: Complete separate interface for searching Talon lists (.talon-list files)
@@ -254,11 +273,14 @@ npm run watch
 
 ## 🎉 What's New in This Version
 
-- **� Revolutionary List Search**: Complete tabbed interface with dedicated Talon list search functionality
+- **🎯 Enhanced User Experience**: Smart focus management with automatic search input focus when switching tabs
+- **⏱️ Configurable Search Debounce**: Customizable search delay (0-30s) with visual feedback and performance optimization  
+- **🔍 Advanced Filtering System**: New tags and operating system filters with enhanced repository breakdown
+- **📑 Revolutionary List Search**: Complete tabbed interface with dedicated Talon list search functionality
 - **🎯 Intelligent List Parsing**: Full support for .talon-list files with comprehensive search capabilities
 - **🎪 Organized Results**: Grouped list results by list name with clean table formatting
 - **🔍 Enhanced Filtering**: Click-to-filter list names with collapsible interface design
-- **�🚀 Performance Revolution**: Migrated from SQLite to optimized JSON storage
+- **🚀 Performance Revolution**: Migrated from SQLite to optimized JSON storage
 - **📊 Repository Insights**: See exactly where your commands come from with clickable stats
 - **🎨 Modern UI**: CSS Grid layout with responsive 3-column design and tabbed navigation
 - **🛠️ Database Tools**: Built-in database management (check/clear with confirmation dialogs)
