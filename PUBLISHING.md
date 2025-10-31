@@ -145,7 +145,7 @@ vsce publish 1.2.3
 
 ### 6.4 Assets
 - [x] **Icon**: Add extension icon (128x128 PNG recommended)
-- [ ] **Screenshots**: Include in README for marketplace display
+- [x] **Screenshots**: Include in README for marketplace display
 
 ## 📦 Step 7: Package the Extension
 
