@@ -19,7 +19,7 @@
 - **🎛️ Advanced Filtering**: Filter by application, mode, repository with real-time results
 - **📊 Repository Breakdown**: See command distribution across your repositories (community, personal, etc.)
 - **🎯 Multiple Search Scopes**: 
-  - 🎪 Command Names Only (exact matches + intelligent list matching)
+  - 🎪 Command Names Only (spoken phrase matches only)
   - 📝 Scripts Only (code content search)
   - 🌐 All (comprehensive search across everything + list matching)
 - **🧠 Intelligent List Matching**: Search by list values to find commands that use them
@@ -70,7 +70,7 @@ The **Intelligent List Matching** feature revolutionizes command discovery by le
 
 ### 🎯 Search Scopes That Support List Matching
 
-- **Command Names Only**: ✅ Includes list matching
+- **Command Names Only**: ❌ List matching disabled (spoken phrases only)
 - **Scripts Only**: ❌ No list matching (searches code content only)  
 - **All**: ✅ Includes list matching + everything else
 
@@ -221,7 +221,7 @@ npm run watch
 - **✨ Enhanced Command Discovery**: Search "left" to find all commands that use arrow keys
 - **🚫 No False Positives**: Only matches actual Talon lists, not code captures
 - **🏃‍♂️ Performance Optimized**: Debounced search with race condition prevention
-- **📊 Works Across All Scopes**: List matching available in Command Names Only and All search scopes
+- **📊 Scope Awareness**: List matching available in the All search scope
 
 ### 🎨 Enhanced UI & User Experience
 - **📑 Tabbed Interface**: Separate "Commands" and "Lists" tabs for focused searching

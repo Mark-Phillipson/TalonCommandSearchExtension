@@ -187,10 +187,12 @@ export class DataManager {
                 // CommandNamesOnly
                 console.log(`[DataManager] Using CommandNamesOnly search scope`);
                 const beforeCount = results.length;
-                results = results.filter(cmd => 
-                    cmd.command.toLowerCase().includes(term) ||
-                    this.commandMatchesListItem(cmd.command, term)
-                );
+                // Only match spoken phrase, not placeholders or script
+                results = results.filter(cmd => {
+                    // Extract spoken phrase up to first <, {, or (
+                    const spoken = cmd.command.split(/<|\{|\(/)[0].trim().toLowerCase();
+                    return spoken.includes(term);
+                });
                 console.log(`[DataManager] CommandNamesOnly: Filtered from ${beforeCount} to ${results.length} results`);
                 
                 // Log first few results for debugging

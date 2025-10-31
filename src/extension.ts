@@ -7,9 +7,11 @@ import { TalonFileParser } from './parser/talonFileParser';
 import { TalonListParser } from './parser/talonListParser';
 
 let searchPanel: vscode.WebviewPanel | undefined;
+
 let db: DataManager;
 const parser = new TalonFileParser();
 const listParser = new TalonListParser();
+let disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext) {
     // Initialize JSON database
@@ -25,28 +27,25 @@ export async function activate(context: vscode.ExtensionContext) {
         db = null as any;
     }
 
-    // Register: Talon: Search Commands
-    context.subscriptions.push(
+
+    // Store all command registrations in disposables array
+    disposables.push(
         vscode.commands.registerCommand('talon.searchCommands', async () => {
             await showSearchPanel(context, SearchScope.All);
         })
     );
 
-    // Register: Talon: Refresh Index
-    context.subscriptions.push(
+    disposables.push(
         vscode.commands.registerCommand('talon.refreshIndex', async () => {
             if (!db) {
                 vscode.window.showErrorMessage('Database not initialized. Please reload the window.');
                 return;
             }
-            
             const config = vscode.workspace.getConfiguration('talonSearch');
             let talonPath = config.get<string>('userFolderPath');
-            
             if (!talonPath) {
                 talonPath = await autoDetectTalonPath();
             }
-
             if (talonPath) {
                 await importTalonFiles(context, talonPath);
                 vscode.window.showInformationMessage('Talon command index refreshed');
@@ -65,13 +64,10 @@ export async function activate(context: vscode.ExtensionContext) {
         })
     );
 
-    // Register: Talon: Import from Folder (opens folder picker for additive import)
-    context.subscriptions.push(
+    disposables.push(
         vscode.commands.registerCommand('talon.openListExplorer', async () => {
-            // Try to default to the Talon user folder
             const defaultPath = await autoDetectTalonPath();
             const defaultUri = defaultPath ? vscode.Uri.file(defaultPath) : undefined;
-            
             const folderUri = await vscode.window.showOpenDialog({
                 canSelectFolders: true,
                 canSelectFiles: false,
@@ -80,20 +76,17 @@ export async function activate(context: vscode.ExtensionContext) {
                 openLabel: 'Import',
                 defaultUri: defaultUri
             });
-
             if (folderUri && folderUri[0]) {
-                await importTalonFiles(context, folderUri[0].fsPath, false); // false = additive import, don't clear existing
+                await importTalonFiles(context, folderUri[0].fsPath, false);
                 vscode.window.showInformationMessage('Import complete');
             }
         })
     );
 
-    // Register: Talon: Set User Folder Path
-    context.subscriptions.push(
+    disposables.push(
         vscode.commands.registerCommand('talon.setUserFolder', async () => {
             const currentPath = vscode.workspace.getConfiguration('talonSearch').get<string>('userFolderPath');
             const detectedPath = await autoDetectTalonPath();
-            
             const folderUri = await vscode.window.showOpenDialog({
                 canSelectFolders: true,
                 canSelectFiles: false,
@@ -103,18 +96,15 @@ export async function activate(context: vscode.ExtensionContext) {
                 defaultUri: currentPath ? vscode.Uri.file(currentPath) : 
                            detectedPath ? vscode.Uri.file(detectedPath) : undefined
             });
-
             if (folderUri && folderUri[0]) {
                 const selectedPath = folderUri[0].fsPath;
                 const config = vscode.workspace.getConfiguration('talonSearch');
                 await config.update('userFolderPath', selectedPath, vscode.ConfigurationTarget.Global);
-                
                 const result = await vscode.window.showInformationMessage(
                     `Talon user folder set to: ${selectedPath}\n\nWould you like to refresh the index now?`,
                     'Refresh Index',
                     'Later'
                 );
-                
                 if (result === 'Refresh Index') {
                     await vscode.commands.executeCommand('talon.refreshIndex');
                 }
@@ -671,7 +661,7 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
             
             <div id="captureStats" class="stats">
                 <div class="stats-total">Common Talon Captures & Lists Reference</div>
-                <p style="color: var(--vscode-descriptionForeground); font-size: 12px; margin: 8px 0;">
+               monty  <p style="color: var(--vscode-descriptionForeground); font-size: 12px; margin: 8px 0;">
                     This tab shows commonly used Talon captures and lists with their available spoken forms. 
                     Use these in your voice commands like "snap left" or "system tray".
                 </p>
@@ -702,5 +692,12 @@ export function deactivate() {
     }
     if (db) {
         db.close();
+    }
+    // Dispose all command registrations
+    if (disposables && disposables.length > 0) {
+        disposables.forEach(d => {
+            try { d.dispose(); } catch (e) { }
+        });
+        disposables = [];
     }
 }

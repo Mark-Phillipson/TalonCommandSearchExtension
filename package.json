@@ -116,6 +116,9 @@
     ]
   },
   "activationEvents": [
-    "onStartupFinished"
+    "onCommand:talon.searchCommands",
+    "onCommand:talon.refreshIndex",
+    "onCommand:talon.openListExplorer",
+    "onCommand:talon.setUserFolder"
   ]
 }
