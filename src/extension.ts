@@ -646,6 +646,7 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
         <div class="tabs">
             <button class="tab-button active" data-tab="commands">Commands</button>
             <button class="tab-button" data-tab="lists">Lists</button>
+            <button class="tab-button" data-tab="captures">Captures & Lists</button>
         </div>
         
         <div id="commandsTab" class="tab-content active">
@@ -703,6 +704,33 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
             </div>
             
             <div id="listResults" class="results"></div>
+        </div>
+        
+        <div id="capturesTab" class="tab-content">
+            <div class="search-box">
+                <input type="text" id="captureSearchInput" placeholder="Search capture/list names, spoken forms, or descriptions..." />
+                <button id="clearCaptureSearch" class="clear-search-btn" title="Clear search">✖</button>
+            </div>
+            
+            <div id="captureStats" class="stats">
+                <div class="stats-total">Common Talon Captures & Lists Reference</div>
+                <p style="color: var(--vscode-descriptionForeground); font-size: 12px; margin: 8px 0;">
+                    This tab shows commonly used Talon captures and lists with their available spoken forms. 
+                    Use these in your voice commands like "snap left" or "go word hello".
+                </p>
+                <div class="capture-legend" style="display: flex; gap: 16px; margin: 8px 0; font-size: 11px;">
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                        <span class="capture-type-badge capture-type-capture">capture</span>
+                        <span style="color: var(--vscode-descriptionForeground);">Dynamic patterns</span>
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                        <span class="capture-type-badge capture-type-list">list</span>
+                        <span style="color: var(--vscode-descriptionForeground);">Fixed value sets</span>
+                    </span>
+                </div>
+            </div>
+            
+            <div id="captureResults" class="results"></div>
         </div>
     </div>
 

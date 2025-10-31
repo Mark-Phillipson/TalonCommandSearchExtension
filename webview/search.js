@@ -17,6 +17,260 @@
     let isSearching = false;
     let lastSearchParams = null;
     let searchDebounceMs = 3000; // Default 3 seconds, will be updated from extension config
+    let capturesData = []; // Will be populated with common Talon captures and lists
+
+    // Initialize captures data with common Talon captures and lists
+    function initializeCapturesData() {
+        capturesData = [
+            {
+                category: "Navigation & Positioning",
+                description: "Commands for moving cursor and navigating text",
+                captures: [
+                    {
+                        name: "user.snap_targets",
+                        type: "capture",
+                        description: "Window snapping positions for window management",
+                        examples: [
+                            { spoken: "snap left", description: "Snap window to left half of screen" },
+                            { spoken: "snap right", description: "Snap window to right half of screen" },
+                            { spoken: "snap up", description: "Snap window to top half of screen" },
+                            { spoken: "snap down", description: "Snap window to bottom half of screen" },
+                            { spoken: "snap maximize", description: "Maximize window" },
+                            { spoken: "snap minimize", description: "Minimize window" },
+                            { spoken: "snap center", description: "Center window on screen" }
+                        ]
+                    },
+                    {
+                        name: "user.arrow_keys",
+                        type: "list",
+                        description: "Arrow key directions for navigation",
+                        examples: [
+                            { spoken: "left", description: "Move cursor left (←)" },
+                            { spoken: "right", description: "Move cursor right (→)" },
+                            { spoken: "up", description: "Move cursor up (↑)" },
+                            { spoken: "down", description: "Move cursor down (↓)" }
+                        ]
+                    },
+                    {
+                        name: "user.navigation_target",
+                        type: "capture",
+                        description: "Common navigation targets in text",
+                        examples: [
+                            { spoken: "word", description: "Navigate by word" },
+                            { spoken: "line", description: "Navigate by line" },
+                            { spoken: "page", description: "Navigate by page" },
+                            { spoken: "paragraph", description: "Navigate by paragraph" },
+                            { spoken: "sentence", description: "Navigate by sentence" },
+                            { spoken: "character", description: "Navigate by character" }
+                        ]
+                    }
+                ]
+            },
+            {
+                category: "Text & Numbers",
+                description: "Spoken forms for typing text and numbers",
+                captures: [
+                    {
+                        name: "user.letter",
+                        type: "list",
+                        description: "NATO phonetic alphabet for spelling",
+                        examples: [
+                            { spoken: "air", description: "Type letter 'a'" },
+                            { spoken: "bat", description: "Type letter 'b'" },
+                            { spoken: "cap", description: "Type letter 'c'" },
+                            { spoken: "drum", description: "Type letter 'd'" },
+                            { spoken: "each", description: "Type letter 'e'" },
+                            { spoken: "fine", description: "Type letter 'f'" },
+                            { spoken: "gust", description: "Type letter 'g'" },
+                            { spoken: "harp", description: "Type letter 'h'" },
+                            { spoken: "sit", description: "Type letter 'i'" },
+                            { spoken: "jury", description: "Type letter 'j'" },
+                            { spoken: "crunch", description: "Type letter 'k'" },
+                            { spoken: "look", description: "Type letter 'l'" },
+                            { spoken: "made", description: "Type letter 'm'" },
+                            { spoken: "near", description: "Type letter 'n'" },
+                            { spoken: "odd", description: "Type letter 'o'" },
+                            { spoken: "pit", description: "Type letter 'p'" },
+                            { spoken: "quench", description: "Type letter 'q'" },
+                            { spoken: "red", description: "Type letter 'r'" },
+                            { spoken: "sun", description: "Type letter 's'" },
+                            { spoken: "trap", description: "Type letter 't'" },
+                            { spoken: "urge", description: "Type letter 'u'" },
+                            { spoken: "vest", description: "Type letter 'v'" },
+                            { spoken: "whale", description: "Type letter 'w'" },
+                            { spoken: "plex", description: "Type letter 'x'" },
+                            { spoken: "yank", description: "Type letter 'y'" },
+                            { spoken: "zip", description: "Type letter 'z'" }
+                        ]
+                    },
+                    {
+                        name: "user.number_small",
+                        type: "list",
+                        description: "Small numbers (1-20) in spoken form",
+                        examples: [
+                            { spoken: "one", description: "Type number '1'" },
+                            { spoken: "two", description: "Type number '2'" },
+                            { spoken: "three", description: "Type number '3'" },
+                            { spoken: "four", description: "Type number '4'" },
+                            { spoken: "five", description: "Type number '5'" },
+                            { spoken: "six", description: "Type number '6'" },
+                            { spoken: "seven", description: "Type number '7'" },
+                            { spoken: "eight", description: "Type number '8'" },
+                            { spoken: "nine", description: "Type number '9'" },
+                            { spoken: "ten", description: "Type number '10'" },
+                            { spoken: "eleven", description: "Type number '11'" },
+                            { spoken: "twelve", description: "Type number '12'" },
+                            { spoken: "thirteen", description: "Type number '13'" },
+                            { spoken: "fourteen", description: "Type number '14'" },
+                            { spoken: "fifteen", description: "Type number '15'" },
+                            { spoken: "sixteen", description: "Type number '16'" },
+                            { spoken: "seventeen", description: "Type number '17'" },
+                            { spoken: "eighteen", description: "Type number '18'" },
+                            { spoken: "nineteen", description: "Type number '19'" },
+                            { spoken: "twenty", description: "Type number '20'" }
+                        ]
+                    },
+                    {
+                        name: "user.symbol_key",
+                        type: "list",
+                        description: "Common symbols and special characters",
+                        examples: [
+                            { spoken: "dot", description: "Type period '.'" },
+                            { spoken: "comma", description: "Type comma ','" },
+                            { spoken: "colon", description: "Type colon ':'" },
+                            { spoken: "semicolon", description: "Type semicolon ';'" },
+                            { spoken: "question", description: "Type question mark '?'" },
+                            { spoken: "exclamation", description: "Type exclamation mark '!'" },
+                            { spoken: "quote", description: "Type single quote \"'\"" },
+                            { spoken: "dub quote", description: "Type double quote '\"'" },
+                            { spoken: "paren", description: "Type opening parenthesis '('" },
+                            { spoken: "r paren", description: "Type closing parenthesis ')'" },
+                            { spoken: "bracket", description: "Type opening bracket '['" },
+                            { spoken: "r bracket", description: "Type closing bracket ']'" },
+                            { spoken: "brace", description: "Type opening brace '{'" },
+                            { spoken: "r brace", description: "Type closing brace '}'" }
+                        ]
+                    }
+                ]
+            },
+            {
+                category: "Editing Commands",
+                description: "Common editing actions and text manipulation",
+                captures: [
+                    {
+                        name: "user.text_action",
+                        type: "capture",
+                        description: "Actions to perform on text selections",
+                        examples: [
+                            { spoken: "copy", description: "Copy selected text" },
+                            { spoken: "cut", description: "Cut selected text" },
+                            { spoken: "paste", description: "Paste from clipboard" },
+                            { spoken: "delete", description: "Delete selected text" },
+                            { spoken: "select", description: "Select text" },
+                            { spoken: "clear", description: "Clear/delete text" },
+                            { spoken: "duplicate", description: "Duplicate text/line" },
+                            { spoken: "undo", description: "Undo last action" },
+                            { spoken: "redo", description: "Redo last action" }
+                        ]
+                    },
+                    {
+                        name: "user.formatters",
+                        type: "capture",
+                        description: "Text formatting and case conversion",
+                        examples: [
+                            { spoken: "snake", description: "Convert to snake_case" },
+                            { spoken: "camel", description: "Convert to camelCase" },
+                            { spoken: "pascal", description: "Convert to PascalCase" },
+                            { spoken: "kebab", description: "Convert to kebab-case" },
+                            { spoken: "upper", description: "Convert to UPPERCASE" },
+                            { spoken: "lower", description: "Convert to lowercase" },
+                            { spoken: "title", description: "Convert to Title Case" },
+                            { spoken: "sentence", description: "Convert to Sentence case" }
+                        ]
+                    }
+                ]
+            },
+            {
+                category: "Application Control",
+                description: "Commands for controlling applications and system",
+                captures: [
+                    {
+                        name: "user.running_applications",
+                        type: "list",
+                        description: "Switch between running applications",
+                        examples: [
+                            { spoken: "code", description: "Switch to VS Code" },
+                            { spoken: "chrome", description: "Switch to Chrome browser" },
+                            { spoken: "firefox", description: "Switch to Firefox browser" },
+                            { spoken: "edge", description: "Switch to Edge browser" },
+                            { spoken: "terminal", description: "Switch to terminal" },
+                            { spoken: "explorer", description: "Switch to file explorer" },
+                            { spoken: "notepad", description: "Switch to Notepad" },
+                            { spoken: "discord", description: "Switch to Discord" }
+                        ]
+                    },
+                    {
+                        name: "user.system_keys",
+                        type: "list",
+                        description: "System function keys and special keys",
+                        examples: [
+                            { spoken: "escape", description: "Press Escape key" },
+                            { spoken: "enter", description: "Press Enter key" },
+                            { spoken: "tab", description: "Press Tab key" },
+                            { spoken: "space", description: "Press Space key" },
+                            { spoken: "backspace", description: "Press Backspace key" },
+                            { spoken: "delete", description: "Press Delete key" },
+                            { spoken: "home", description: "Press Home key" },
+                            { spoken: "end", description: "Press End key" },
+                            { spoken: "page up", description: "Press Page Up key" },
+                            { spoken: "page down", description: "Press Page Down key" }
+                        ]
+                    }
+                ]
+            },
+            {
+                category: "Programming",
+                description: "Common programming constructs and syntax",
+                captures: [
+                    {
+                        name: "user.code_operators",
+                        type: "capture",
+                        description: "Programming operators and symbols",
+                        examples: [
+                            { spoken: "equals", description: "Assignment operator '='" },
+                            { spoken: "plus equals", description: "Add assignment '+=' " },
+                            { spoken: "minus equals", description: "Subtract assignment '-='" },
+                            { spoken: "and", description: "Logical AND '&&'" },
+                            { spoken: "or", description: "Logical OR '||'" },
+                            { spoken: "not", description: "Logical NOT '!'" },
+                            { spoken: "greater", description: "Greater than '>'" },
+                            { spoken: "less", description: "Less than '<'" },
+                            { spoken: "greater equal", description: "Greater than or equal '>='" },
+                            { spoken: "less equal", description: "Less than or equal '<='" }
+                        ]
+                    },
+                    {
+                        name: "user.code_keywords",
+                        type: "capture",
+                        description: "Common programming keywords",
+                        examples: [
+                            { spoken: "if", description: "If statement" },
+                            { spoken: "else", description: "Else clause" },
+                            { spoken: "for", description: "For loop" },
+                            { spoken: "while", description: "While loop" },
+                            { spoken: "function", description: "Function declaration" },
+                            { spoken: "return", description: "Return statement" },
+                            { spoken: "class", description: "Class declaration" },
+                            { spoken: "import", description: "Import statement" },
+                            { spoken: "export", description: "Export statement" },
+                            { spoken: "try", description: "Try block" },
+                            { spoken: "catch", description: "Catch block" }
+                        ]
+                    }
+                ]
+            }
+        ];
+    }
 
     // Request search from extension host (SQLite backend)
     function performSearch() {
@@ -202,6 +456,139 @@
         });
     }
 
+    // Perform capture search
+    function performCaptureSearch() {
+        const searchTerm = document.getElementById('captureSearchInput')?.value.trim().toLowerCase() || '';
+        console.log('[CaptureSearch] Performing capture search:', { searchTerm });
+        
+        displayCaptureResults(searchTerm);
+    }
+
+    // Display capture results
+    function displayCaptureResults(searchTerm = '') {
+        const resultsDiv = document.getElementById('captureResults');
+        if (!resultsDiv) return;
+        
+        resultsDiv.innerHTML = '';
+        
+        if (capturesData.length === 0) {
+            resultsDiv.innerHTML = '<p class="no-results">Captures & Lists data not loaded.</p>';
+            return;
+        }
+        
+        let totalMatches = 0;
+        
+        capturesData.forEach(category => {
+            const categoryMatches = [];
+            
+            category.captures.forEach(capture => {
+                if (!searchTerm) {
+                    // No search term - show all
+                    categoryMatches.push(capture);
+                } else {
+                    // Check if capture name, description, or any example matches search term
+                    const nameMatch = capture.name.toLowerCase().includes(searchTerm);
+                    const descMatch = capture.description.toLowerCase().includes(searchTerm);
+                    const exampleMatch = capture.examples.some(ex => 
+                        ex.spoken.toLowerCase().includes(searchTerm) || 
+                        ex.description.toLowerCase().includes(searchTerm)
+                    );
+                    
+                    if (nameMatch || descMatch || exampleMatch) {
+                        categoryMatches.push(capture);
+                    }
+                }
+            });
+            
+            if (categoryMatches.length > 0) {
+                totalMatches += categoryMatches.reduce((count, capture) => count + capture.examples.length, 0);
+                
+                // Create category header
+                const categoryHeader = document.createElement('div');
+                categoryHeader.className = 'capture-category-header';
+                categoryHeader.innerHTML = `
+                    <h2 class="capture-category-title">${escapeHtml(category.category)}</h2>
+                    <p class="capture-category-description">${escapeHtml(category.description)}</p>
+                `;
+                resultsDiv.appendChild(categoryHeader);
+                
+                // Create captures in this category
+                categoryMatches.forEach(capture => {
+                    const captureGroup = document.createElement('div');
+                    captureGroup.className = `capture-group capture-type-${capture.type}`;
+                    
+                    const groupHeader = document.createElement('div');
+                    groupHeader.className = 'capture-group-header';
+                    groupHeader.innerHTML = `
+                        <span class="capture-name">${highlightSearchTerm(capture.name, searchTerm)}</span>
+                        <span class="capture-type-badge capture-type-${capture.type}">${capture.type}</span>
+                        <span class="capture-toggle">▼</span>
+                    `;
+                    
+                    const description = document.createElement('div');
+                    description.className = 'capture-description';
+                    description.innerHTML = highlightSearchTerm(capture.description, searchTerm);
+                    
+                    const content = document.createElement('div');
+                    content.className = 'capture-content';
+                    
+                    const examplesDiv = document.createElement('div');
+                    examplesDiv.className = 'capture-examples';
+                    
+                    capture.examples.forEach(example => {
+                        const exampleDiv = document.createElement('div');
+                        exampleDiv.className = 'capture-example';
+                        exampleDiv.innerHTML = `
+                            <div class="example-spoken">${highlightSearchTerm(example.spoken, searchTerm)}</div>
+                            <div class="example-description">${highlightSearchTerm(example.description, searchTerm)}</div>
+                        `;
+                        examplesDiv.appendChild(exampleDiv);
+                    });
+                    
+                    content.appendChild(examplesDiv);
+                    captureGroup.appendChild(groupHeader);
+                    captureGroup.appendChild(description);
+                    captureGroup.appendChild(content);
+                    
+                    // Add click handler for collapsible groups
+                    groupHeader.addEventListener('click', () => {
+                        captureGroup.classList.toggle('collapsed');
+                    });
+                    
+                    resultsDiv.appendChild(captureGroup);
+                });
+            }
+        });
+        
+        // Add results header if we found matches
+        if (totalMatches > 0) {
+            const header = document.createElement('div');
+            header.className = 'results-header';
+            if (searchTerm) {
+                header.textContent = `Found ${totalMatches} spoken form${totalMatches !== 1 ? 's' : ''} matching "${searchTerm}"`;
+            } else {
+                header.textContent = `${totalMatches} available spoken forms in ${capturesData.length} categories`;
+            }
+            resultsDiv.insertBefore(header, resultsDiv.firstChild);
+        } else if (searchTerm) {
+            resultsDiv.innerHTML = `<p class="no-results">No captures or lists found matching "${escapeHtml(searchTerm)}". Try a different search term.</p>`;
+        }
+    }
+
+    // Highlight search terms in text
+    function highlightSearchTerm(text, searchTerm) {
+        if (!searchTerm) return escapeHtml(text);
+        
+        const escapedText = escapeHtml(text);
+        const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
+        return escapedText.replace(regex, '<span class="search-highlight">$1</span>');
+    }
+
+    // Escape special regex characters
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
     // Spinner control functions
     function showSearchPending() {
         const spinner = document.getElementById('searchSpinner');
@@ -359,6 +746,8 @@
             if (totalLists > 0) {
                 performListSearch();
             }
+        } else if (tabName === 'captures') {
+            performCaptureSearch();
         }
     }
 
@@ -642,6 +1031,10 @@
     function init() {
         console.log('[Init] Initializing webview...');
         
+        // Initialize captures and lists data
+        initializeCapturesData();
+        console.log('[Init] Captures & Lists data initialized with', capturesData.length, 'categories');
+        
         // Setup event listeners
         setupEventListeners();
         
@@ -652,10 +1045,12 @@
         vscode.postMessage({ command: 'getConfig' });
         vscode.postMessage({ command: 'getStats' });
         
-        // Perform initial search if we have commands
+        // Perform initial search based on current tab
         setTimeout(() => {
-            if (totalCommands > 0) {
+            if (currentTab === 'commands' && totalCommands > 0) {
                 performSearch();
+            } else if (currentTab === 'captures') {
+                performCaptureSearch();
             }
         }, 500);
     }
@@ -674,6 +1069,12 @@
                 if (listSearchInput) {
                     listSearchInput.focus();
                     console.log('[Init] Focus set on lists search input');
+                }
+            } else if (currentTab === 'captures') {
+                const captureSearchInput = document.getElementById('captureSearchInput');
+                if (captureSearchInput) {
+                    captureSearchInput.focus();
+                    console.log('[Init] Focus set on captures search input');
                 }
             }
         }, 100); // Small delay to ensure DOM is fully rendered
@@ -818,6 +1219,26 @@
             });
             console.log('[Init] Clear list search button listener attached');
         }
+        
+        // Capture search input handler
+        const captureSearchInput = document.getElementById('captureSearchInput');
+        if (captureSearchInput) {
+            captureSearchInput.addEventListener('input', performCaptureSearch);
+            console.log('[Init] Capture search input listener attached');
+        }
+        
+        // Clear capture search button handler
+        const clearCaptureSearchBtn = document.getElementById('clearCaptureSearch');
+        if (clearCaptureSearchBtn) {
+            clearCaptureSearchBtn.addEventListener('click', () => {
+                const captureSearchInput = document.getElementById('captureSearchInput');
+                if (captureSearchInput) {
+                    captureSearchInput.value = '';
+                    performCaptureSearch();
+                }
+            });
+            console.log('[Init] Clear capture search button listener attached');
+        }
     }
 
     // Handle messages from extension
@@ -844,6 +1265,8 @@
                     performSearch();
                 } else if (currentTab === 'lists' && message.totalLists > 0) {
                     performListSearch();
+                } else if (currentTab === 'captures') {
+                    performCaptureSearch();
                 }
                 break;
                 

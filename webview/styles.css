@@ -48,7 +48,7 @@ h1 {
     align-items: stretch;
 }
 
-#searchInput, #listSearchInput {
+#searchInput, #listSearchInput, #captureSearchInput {
     flex: 1;
     padding: 8px 12px;
     background: var(--vscode-input-background);
@@ -58,7 +58,7 @@ h1 {
     font-size: 14px;
 }
 
-#searchInput:focus, #listSearchInput:focus {
+#searchInput:focus, #listSearchInput:focus, #captureSearchInput:focus {
     outline: 1px solid var(--vscode-focusBorder);
 }
 
@@ -655,4 +655,182 @@ h1 {
 .spinner-text {
     font-size: 14px;
     font-weight: 500;
+}
+
+/* Captures tab specific styles */
+.capture-group {
+    margin-bottom: 20px;
+    background: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.capture-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--vscode-editorGroupHeader-tabsBackground);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.capture-group-header:hover {
+    background: var(--vscode-list-hoverBackground);
+}
+
+.capture-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--vscode-textLink-foreground);
+    font-family: var(--vscode-editor-font-family);
+}
+
+.capture-toggle {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+    transition: transform 0.2s ease;
+}
+
+.capture-group.collapsed .capture-toggle {
+    transform: rotate(-90deg);
+}
+
+.capture-description {
+    padding: 8px 16px;
+    color: var(--vscode-descriptionForeground);
+    font-size: 13px;
+    background: var(--vscode-textBlockQuote-background);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    font-style: italic;
+}
+
+.capture-content {
+    padding: 16px;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.capture-group.collapsed .capture-content {
+    display: none;
+}
+
+.capture-examples {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.capture-example {
+    background: var(--vscode-textCodeBlock-background);
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 4px;
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+}
+
+.capture-example:hover {
+    border-color: var(--vscode-focusBorder);
+    background: var(--vscode-list-hoverBackground);
+}
+
+.example-spoken {
+    font-family: var(--vscode-editor-font-family);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--vscode-textLink-foreground);
+    margin-bottom: 4px;
+}
+
+.example-description {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+    line-height: 1.3;
+}
+
+.capture-category-header {
+    margin: 24px 0 16px 0;
+    padding: 8px 12px;
+    background: var(--vscode-textBlockQuote-background);
+    border-left: 4px solid var(--vscode-textLink-foreground);
+    border-radius: 0 4px 4px 0;
+}
+
+.capture-category-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+}
+
+.capture-category-description {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: var(--vscode-descriptionForeground);
+    font-style: italic;
+}
+
+/* All captures expanded by default, but allow search filtering */
+.capture-group.hidden {
+    display: none;
+}
+
+/* Highlight matched search terms */
+.search-highlight {
+    background: var(--vscode-editor-findMatchHighlightBackground);
+    color: var(--vscode-editor-findMatchForeground);
+    font-weight: 600;
+    padding: 1px 2px;
+    border-radius: 2px;
+}
+
+/* Type badges for captures vs lists */
+.capture-type-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+.capture-type-capture {
+    background: var(--vscode-charts-blue, #007acc);
+    color: var(--vscode-editor-background, #ffffff);
+    border: 1px solid var(--vscode-charts-blue, #007acc);
+}
+
+.capture-type-list {
+    background: var(--vscode-charts-green, #388a34);
+    color: var(--vscode-editor-background, #ffffff);
+    border: 1px solid var(--vscode-charts-green, #388a34);
+}
+
+/* Color-coded borders for capture groups */
+.capture-group {
+    position: relative;
+}
+
+.capture-group::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 0 2px 2px 0;
+}
+
+.capture-group.capture-type-capture::before {
+    background: var(--vscode-charts-blue, #007acc);
+}
+
+.capture-group.capture-type-list::before {
+    background: var(--vscode-charts-green, #388a34);
 }
