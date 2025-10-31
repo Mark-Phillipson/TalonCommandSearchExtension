@@ -63,6 +63,15 @@
         lastSearchParams = { ...searchParams };
         isSearching = true;
         
+        // Show spinner with contextual message
+        let spinnerMessage = 'Searching commands...';
+        if (searchTerm) {
+            spinnerMessage = `Searching for "${searchTerm}"...`;
+        } else if (application || mode || repository) {
+            spinnerMessage = 'Applying filters...';
+        }
+        showSearchSpinner(spinnerMessage);
+        
         console.log('[Search] Performing search:', { searchTerm, searchScope, scopeValue: scopeElement?.value, application, mode, repository });
         
         vscode.postMessage({
@@ -75,6 +84,13 @@
     function performListSearch() {
         const searchTerm = document.getElementById('listSearchInput')?.value.trim() || '';
         
+        // Show spinner with contextual message
+        let spinnerMessage = 'Searching lists...';
+        if (searchTerm) {
+            spinnerMessage = `Searching lists for "${searchTerm}"...`;
+        }
+        showListSearchSpinner(spinnerMessage);
+        
         console.log('[ListSearch] Performing list search:', { searchTerm });
         
         vscode.postMessage({
@@ -86,6 +102,9 @@
 
     // Display list results in UI
     function displayListResults(results) {
+        // Hide spinner
+        hideListSearchSpinner();
+        
         const resultsDiv = document.getElementById('listResults');
         if (!resultsDiv) return;
         
@@ -172,10 +191,46 @@
         });
     }
 
+    // Spinner control functions
+    function showSearchSpinner(message = 'Searching commands...') {
+        const spinner = document.getElementById('searchSpinner');
+        const results = document.getElementById('results');
+        const spinnerText = spinner?.querySelector('.spinner-text');
+        
+        if (spinner) spinner.classList.add('visible');
+        if (results) results.style.display = 'none';
+        if (spinnerText) spinnerText.textContent = message;
+    }
+    
+    function hideSearchSpinner() {
+        const spinner = document.getElementById('searchSpinner');
+        const results = document.getElementById('results');
+        if (spinner) spinner.classList.remove('visible');
+        if (results) results.style.display = 'grid';
+    }
+    
+    function showListSearchSpinner(message = 'Searching lists...') {
+        const spinner = document.getElementById('listSearchSpinner');
+        const results = document.getElementById('listResults');
+        const spinnerText = spinner?.querySelector('.spinner-text');
+        
+        if (spinner) spinner.classList.add('visible');
+        if (results) results.style.display = 'none';
+        if (spinnerText) spinnerText.textContent = message;
+    }
+    
+    function hideListSearchSpinner() {
+        const spinner = document.getElementById('listSearchSpinner');
+        const results = document.getElementById('listResults');
+        if (spinner) spinner.classList.remove('visible');
+        if (results) results.style.display = 'block';
+    }
+
     // Display results in UI
     function displayResults(results) {
-        // Mark search as complete
+        // Mark search as complete and hide spinner
         isSearching = false;
+        hideSearchSpinner();
         
         const resultsDiv = document.getElementById('results');
         if (!resultsDiv) return;
@@ -265,9 +320,13 @@
         
         // Trigger appropriate search based on current tab
         if (tabName === 'commands') {
-            performSearch();
+            if (totalCommands > 0) {
+                performSearch();
+            }
         } else if (tabName === 'lists') {
-            performListSearch();
+            if (totalLists > 0) {
+                performListSearch();
+            }
         }
     }
 
@@ -689,6 +748,11 @@
                 
             case 'error':
                 console.error('[Webview] Error from extension:', message.message);
+                // Hide spinners and mark search as complete
+                isSearching = false;
+                hideSearchSpinner();
+                hideListSearchSpinner();
+                
                 const resultsDiv = document.getElementById('results');
                 if (resultsDiv) {
                     resultsDiv.innerHTML = `<p class="error-message">⚠️ ${message.message}</p>`;

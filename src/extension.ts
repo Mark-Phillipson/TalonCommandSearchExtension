@@ -645,6 +645,11 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
 
             <div id="stats" class="stats"></div>
             
+            <div id="searchSpinner" class="search-spinner">
+                <div class="spinner"></div>
+                <span class="spinner-text">Searching commands...</span>
+            </div>
+            
             <div id="results" class="results"></div>
         </div>
         
@@ -655,6 +660,11 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
             </div>
             
             <div id="listStats" class="stats"></div>
+            
+            <div id="listSearchSpinner" class="search-spinner">
+                <div class="spinner"></div>
+                <span class="spinner-text">Searching lists...</span>
+            </div>
             
             <div id="listResults" class="results"></div>
         </div>

@@ -587,3 +587,36 @@ h1 {
 .source-compact.clickable:hover {
     color: var(--vscode-textLink-activeForeground);
 }
+
+/* Spinner styles */
+.search-spinner {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: var(--vscode-descriptionForeground);
+}
+
+.search-spinner.visible {
+    display: flex;
+}
+
+.spinner {
+    border: 2px solid var(--vscode-progressBar-background, #e0e0e0);
+    border-top: 2px solid var(--vscode-textLink-foreground);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+    margin-right: 12px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner-text {
+    font-size: 14px;
+    font-weight: 500;
+}
