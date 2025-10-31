@@ -24,9 +24,9 @@ npm install -g @vscode/vsce
 2. Sign in with your Microsoft account
 3. Click **"Create Publisher"**
 4. Fill in the required information:
-   - **Publisher ID**: `mark-phillipson` (already configured in package.json)
+   - **Publisher ID**: `marcusvoicecoder` (already configured in package.json)
    - **Display Name**: Your display name
-   - **Email**: Your contact email
+   - **Email**: Your contact email: MPhillipson0@Gmail.com
    - **Website**: Optional
 5. Click **"Create"**
 
@@ -67,7 +67,7 @@ Under **"Custom defined"**, expand **"Marketplace"** and select:
 Use your Personal Access Token to login:
 
 ```powershell
-vsce login mark-phillipson
+vsce login marcusvoicecoder
 ```
 
 When prompted, paste your Personal Access Token.
