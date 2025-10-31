@@ -1,2 +1,3 @@
- now can we document the latest changes in the readme?
- 
+ I'm not sure about this one we have talon captures that have the ability to produce dynamic lists of results to be used with voice commands but I would like to be able to search captures and have a rudimentary idea of what values match is this possible or do we need to manually create Static markdown files to document these lists?
+
+  maybe a new tab that would have a select few that are commonly used like the snap  commands where we can say something like snap left or snap right and it would show the list of available options for that command.

@@ -49,6 +49,7 @@
         const mode = document.getElementById('filterMode')?.value || undefined;
         const repository = document.getElementById('filterRepository')?.value || undefined;
         const tags = document.getElementById('filterTags')?.value || undefined;
+        const title = document.getElementById('filterTitle')?.value || undefined;
         const operatingSystem = document.getElementById('filterOperatingSystem')?.value || undefined;
         
         // Create search parameters object
@@ -59,6 +60,7 @@
             mode: mode === '' ? undefined : mode,
             repository: repository === '' ? undefined : repository,
             tags: tags === '' ? undefined : tags,
+            title: title === '' ? undefined : title,
             operatingSystem: operatingSystem === '' ? undefined : operatingSystem,
             maxResults: 500
         };
@@ -81,7 +83,7 @@
         }
         showSearchSpinner(spinnerMessage);
         
-        console.log('[Search] Performing search:', { searchTerm, searchScope, scopeValue: scopeElement?.value, application, mode, repository });
+        console.log('[Search] Performing search:', { searchTerm, searchScope, scopeValue: scopeElement?.value, application, mode, repository, title });
         
         vscode.postMessage({
             command: 'search',
@@ -470,6 +472,7 @@
         const appFilter = document.getElementById('filterApplication');
         const modeFilter = document.getElementById('filterMode');
         const repoFilter = document.getElementById('filterRepository');
+        const titleFilter = document.getElementById('filterTitle');
         
         if (appFilter) {
             appFilter.innerHTML = '<option value="">All Applications</option>';
@@ -510,6 +513,20 @@
                 option.value = repo;
                 option.textContent = repo;
                 repoFilter.appendChild(option);
+            });
+        }
+        
+        if (titleFilter) {
+            titleFilter.innerHTML = '<option value="">All Titles</option>';
+            // Sort titles alphabetically
+            const sortedTitles = [...filters.titles].sort((a, b) => 
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+            sortedTitles.forEach(title => {
+                const option = document.createElement('option');
+                option.value = title;
+                option.textContent = title;
+                titleFilter.appendChild(option);
             });
         }
         
@@ -672,6 +689,7 @@
         const filterApplication = document.getElementById('filterApplication');
         const filterMode = document.getElementById('filterMode');
         const filterRepository = document.getElementById('filterRepository');
+        const filterTitle = document.getElementById('filterTitle');
         
         if (searchInput) {
             searchInput.addEventListener('input', performSearch);
@@ -700,6 +718,11 @@
                 performSearch();
             });
             console.log('[Init] Repository filter listener attached');
+        }
+        
+        if (filterTitle) {
+            filterTitle.addEventListener('change', performSearch);
+            console.log('[Init] Title filter listener attached');
         }
         
         const filterTags = document.getElementById('filterTags');

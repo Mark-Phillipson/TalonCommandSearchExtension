@@ -113,9 +113,10 @@ export class DataManager {
         repository?: string,
         tags?: string,
         operatingSystem?: string,
+        title?: string,
         maxResults: number = 500
     ): TalonVoiceCommand[] {
-        console.log(`[DataManager] Search called with: term="${searchTerm}", scope=${searchScope}, app="${application}", mode="${mode}", repo="${repository}", tags="${tags}", os="${operatingSystem}"`);
+        console.log(`[DataManager] Search called with: term="${searchTerm}", scope=${searchScope}, app="${application}", mode="${mode}", repo="${repository}", tags="${tags}", os="${operatingSystem}", title="${title}"`);
         console.log(`[DataManager] Database has ${this.commands.length} commands and ${this.lists.length} list items`);
         
         // Debug: Check for commands with list placeholders
@@ -146,6 +147,9 @@ export class DataManager {
         }
         if (operatingSystem) {
             results = results.filter(cmd => cmd.operatingSystem === operatingSystem);
+        }
+        if (title) {
+            results = results.filter(cmd => cmd.title === title);
         }
 
         // Apply search term
@@ -215,11 +219,13 @@ export class DataManager {
         repositories: string[];
         operatingSystems: string[];
         tags: string[];
+        titles: string[];
     } {
         const applications = [...new Set(this.commands.map(cmd => cmd.application).filter(Boolean) as string[])].sort();
         const modes = [...new Set(this.commands.map(cmd => cmd.mode).filter(Boolean) as string[])].sort();
         const repositories = [...new Set(this.commands.map(cmd => cmd.repository).filter(Boolean) as string[])].sort();
         const operatingSystems = [...new Set(this.commands.map(cmd => cmd.operatingSystem).filter(Boolean) as string[])].sort();
+        const titles = [...new Set(this.commands.map(cmd => cmd.title).filter(Boolean) as string[])].sort();
         
         // Extract individual tags from comma-separated tag strings
         const allTags = this.commands
@@ -234,7 +240,8 @@ export class DataManager {
             modes,
             repositories,
             operatingSystems,
-            tags
+            tags,
+            titles
         };
     }
 
