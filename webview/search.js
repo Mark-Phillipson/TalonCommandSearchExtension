@@ -345,6 +345,9 @@
             targetTab.classList.add('active');
         }
         
+        // Set focus on the search input for the new active tab
+        setFocusOnActiveTab();
+        
         // Trigger appropriate search based on current tab
         if (tabName === 'commands') {
             if (totalCommands > 0) {
@@ -625,6 +628,9 @@
         // Setup event listeners
         setupEventListeners();
         
+        // Set focus on the search input for the current active tab
+        setFocusOnActiveTab();
+        
         // Request configuration and initial stats
         vscode.postMessage({ command: 'getConfig' });
         vscode.postMessage({ command: 'getStats' });
@@ -635,6 +641,25 @@
                 performSearch();
             }
         }, 500);
+    }
+
+    // Set focus on the search input for the currently active tab
+    function setFocusOnActiveTab() {
+        setTimeout(() => {
+            if (currentTab === 'commands') {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.focus();
+                    console.log('[Init] Focus set on commands search input');
+                }
+            } else if (currentTab === 'lists') {
+                const listSearchInput = document.getElementById('listSearchInput');
+                if (listSearchInput) {
+                    listSearchInput.focus();
+                    console.log('[Init] Focus set on lists search input');
+                }
+            }
+        }, 100); // Small delay to ensure DOM is fully rendered
     }
 
     // Setup event listeners (moved to a function to be called after DOM is ready)
