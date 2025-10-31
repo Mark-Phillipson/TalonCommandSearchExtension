@@ -6,3 +6,6 @@ tsconfig.json
 node_modules/**
 *.map
 *.ts
+
+test-data/user/**
+test-db/talon-commands.json
