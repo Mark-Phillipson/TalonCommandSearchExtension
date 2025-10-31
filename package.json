@@ -4,6 +4,7 @@
   "publisher": "mark-phillipson",
   "description": "Search and browse 10k+ Talon Voice commands and lists with advanced filtering",
   "version": "0.0.1",
+  "icon": "talon_command_search.png",
   "engines": {
     "vscode": "^1.80.0"
   },
