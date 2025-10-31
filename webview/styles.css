@@ -637,6 +637,16 @@ h1 {
     margin-right: 12px;
 }
 
+/* Pending search styles - different color to distinguish from active search */
+.search-spinner.pending .spinner {
+    border-top: 2px solid var(--vscode-charts-orange, #ff8c00);
+    animation: spin 2s linear infinite; /* Slower spin for pending state */
+}
+
+.search-spinner.pending .spinner-text {
+    color: var(--vscode-charts-orange, #ff8c00);
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }

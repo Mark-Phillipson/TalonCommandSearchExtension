@@ -16,6 +16,7 @@
     let searchTimeout = null;
     let isSearching = false;
     let lastSearchParams = null;
+    let searchDebounceMs = 3000; // Default 3 seconds, will be updated from extension config
 
     // Request search from extension host (SQLite backend)
     function performSearch() {
@@ -25,10 +26,13 @@
             searchTimeout = null;
         }
         
+        // Show visual feedback that search is pending
+        showSearchPending();
+        
         // Debounce search requests
         searchTimeout = setTimeout(() => {
             performSearchImmediate();
-        }, 150);
+        }, searchDebounceMs);
     }
     
     function performSearchImmediate() {
@@ -197,12 +201,30 @@
     }
 
     // Spinner control functions
+    function showSearchPending() {
+        const spinner = document.getElementById('searchSpinner');
+        const results = document.getElementById('results');
+        const spinnerText = spinner?.querySelector('.spinner-text');
+        
+        if (spinner) {
+            spinner.classList.add('visible', 'pending');
+        }
+        if (results) results.style.display = 'none';
+        if (spinnerText) {
+            const delaySeconds = (searchDebounceMs / 1000).toFixed(1);
+            spinnerText.textContent = `Search will start in ${delaySeconds}s (typing to reset delay)...`;
+        }
+    }
+    
     function showSearchSpinner(message = 'Searching commands...') {
         const spinner = document.getElementById('searchSpinner');
         const results = document.getElementById('results');
         const spinnerText = spinner?.querySelector('.spinner-text');
         
-        if (spinner) spinner.classList.add('visible');
+        if (spinner) {
+            spinner.classList.add('visible');
+            spinner.classList.remove('pending'); // Remove pending state when actually searching
+        }
         if (results) results.style.display = 'none';
         if (spinnerText) spinnerText.textContent = message;
     }
@@ -210,7 +232,7 @@
     function hideSearchSpinner() {
         const spinner = document.getElementById('searchSpinner');
         const results = document.getElementById('results');
-        if (spinner) spinner.classList.remove('visible');
+        if (spinner) spinner.classList.remove('visible', 'pending');
         if (results) results.style.display = 'grid';
     }
     
@@ -603,7 +625,8 @@
         // Setup event listeners
         setupEventListeners();
         
-        // Request initial stats
+        // Request configuration and initial stats
+        vscode.postMessage({ command: 'getConfig' });
         vscode.postMessage({ command: 'getStats' });
         
         // Perform initial search if we have commands
@@ -790,6 +813,14 @@
                 const scopeSelect = document.getElementById('searchScope');
                 if (scopeSelect) {
                     scopeSelect.value = message.scope.toString();
+                }
+                break;
+                
+            case 'config':
+                console.log('[Webview] Received config:', message.config);
+                if (message.config.searchDebounceMs !== undefined) {
+                    searchDebounceMs = message.config.searchDebounceMs;
+                    console.log('[Webview] Search debounce set to:', searchDebounceMs, 'ms');
                 }
                 break;
                 

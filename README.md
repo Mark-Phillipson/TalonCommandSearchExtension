@@ -117,7 +117,8 @@ The extension now includes a complete **List Search** interface for browsing and
 {
   "talonSearch.userFolderPath": "",           // 📁 Leave empty for auto-detection
   "talonSearch.enableAutoIndexing": true,     // 🔄 Auto-import on startup  
-  "talonSearch.maxSearchResults": 500         // 📊 Max results per search
+  "talonSearch.maxSearchResults": 500,        // 📊 Max results per search
+  "talonSearch.searchDebounceMs": 3000        // ⏱️ Search delay in milliseconds (0-30000)
 }
 ```
 
@@ -129,6 +130,10 @@ The extension now includes a complete **List Search** interface for browsing and
   - Linux: `~/.talon/user`
 - **Auto Indexing**: Automatically imports commands on VS Code startup
 - **Max Results**: Prevents UI slowdown with large result sets (default: 500)
+- **Search Debounce**: Configurable delay before performing search (default: 3000ms)
+  - ⏱️ Prevents searches on every keystroke for better performance
+  - 🎯 Adjustable from 0ms (instant) to 30 seconds
+  - 💡 Recommended: 1000-3000ms for optimal user experience
 
 ## 👨‍💻 Development
 
@@ -165,6 +170,13 @@ npm run watch
 - **Database Isolation**: Commands stored in extension global storage, workspace-independent
 
 ## 🆕 Recent Updates (Latest)
+
+### ⏱️ Configurable Search Debounce (NEW!)
+- **🎯 Smart Search Timing**: Configurable delay prevents searches on every keystroke
+- **⚙️ Fully Customizable**: Adjust delay from 0ms (instant) to 30 seconds via VS Code settings  
+- **🎨 Visual Feedback**: Orange pending indicator shows search will start with countdown
+- **🚀 Performance Optimized**: Reduces server load while maintaining responsive feel
+- **💡 Smart Defaults**: 5-second default delay balances performance and usability
 
 ### 📑 Revolutionary Talon List Search (NEW!)
 - **🎯 Dedicated List Search Tab**: Complete separate interface for searching Talon lists (.talon-list files)

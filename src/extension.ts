@@ -291,6 +291,18 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             listNames: listNames
                         });
                         break;
+                        
+                    case 'getConfig':
+                        const config = vscode.workspace.getConfiguration('talonSearch');
+                        const searchDebounceMs = config.get<number>('searchDebounceMs', 3000);
+                        console.log('[Config] Sending config to webview:', { searchDebounceMs });
+                        searchPanel?.webview.postMessage({
+                            command: 'config',
+                            config: {
+                                searchDebounceMs: searchDebounceMs
+                            }
+                        });
+                        break;
 
                     case 'openFile':
                         await openTalonFile(message.filePath);
@@ -365,6 +377,16 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
             filters: filters,
             repositoryBreakdown: repositoryBreakdown,
             listNames: listNames
+        });
+        
+        // Send initial configuration
+        const config = vscode.workspace.getConfiguration('talonSearch');
+        const searchDebounceMs = config.get<number>('searchDebounceMs', 3000);
+        searchPanel.webview.postMessage({
+            command: 'config',
+            config: {
+                searchDebounceMs: searchDebounceMs
+            }
         });
     } else {
         searchPanel.webview.postMessage({

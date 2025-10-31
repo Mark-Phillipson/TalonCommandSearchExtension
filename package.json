@@ -60,6 +60,13 @@
           "type": "number",
           "default": 500,
           "description": "Maximum search results to display"
+        },
+        "talonSearch.searchDebounceMs": {
+          "type": "number",
+          "default": 3000,
+          "minimum": 0,
+          "maximum": 30000,
+          "description": "Delay in milliseconds before performing search after typing (0-30000ms, default: 3000ms)"
         }
       }
     },
