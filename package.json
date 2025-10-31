@@ -7,6 +7,7 @@
     "email": "MPhillipson0@Gmail.com"
   },
   "description": "Search and browse 10k+ Talon Voice commands and lists with advanced filtering. Kind of like what can I say but better!",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Mark-Phillipson/TalonCommandSearchExtension"
