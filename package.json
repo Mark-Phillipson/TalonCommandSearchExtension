@@ -7,7 +7,7 @@
     "email": "MPhillipson0@Gmail.com"
   },
   "description": "Search and browse 10k+ Talon Voice commands and lists with advanced filtering. Kind of like what can I say but better!",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "icon": "talon_command_search.png",
   "engines": {
     "vscode": "^1.80.0"
