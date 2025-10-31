@@ -187,6 +187,10 @@ npm run watch
 - **📱 Touch-Friendly Interface**: Better click targets and responsive design elements
 - **🎭 Voice-Optimized UX**: Minimal navigation required for efficient voice command usage
 
+### 🛒 Marketplace Discoverability (NEW!)
+- **🎯 Targeted Categories**: Published under *Programming Languages*, *Snippets*, and *Other* to help the right users find the extension faster
+- **🧹 Clean Console Output**: Removed development-only `console.log` statements to keep logs focused on actionable information during troubleshooting
+
 ### ⏱️ Configurable Search Debounce (NEW!)
 - **🎯 Smart Search Timing**: Configurable delay prevents searches on every keystroke
 - **⚙️ Fully Customizable**: Adjust delay from 0ms (instant) to 30 seconds via VS Code settings  

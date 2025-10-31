@@ -12,14 +12,11 @@ const parser = new TalonFileParser();
 const listParser = new TalonListParser();
 
 export async function activate(context: vscode.ExtensionContext) {
-    console.log('Talon Command Search extension is now active');
-
     // Initialize JSON database
     try {
         const storagePath = context.globalStorageUri.fsPath;
         db = new DataManager(storagePath);
         db.initialize();
-        console.log('JSON database initialized at:', storagePath);
     } catch (err) {
         const error = err as Error;
         console.error('Failed to initialize database:', error);
@@ -127,35 +124,21 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Auto-import on startup if enabled
     const config = vscode.workspace.getConfiguration('talonSearch');
-    console.log('Talon config:', {
-        enableAutoIndexing: config.get<boolean>('enableAutoIndexing'),
-        userFolderPath: config.get<string>('userFolderPath')
-    });
     
     if (config.get<boolean>('enableAutoIndexing')) {
         let talonPath = config.get<string>('userFolderPath');
         if (!talonPath) {
             talonPath = await autoDetectTalonPath();
-            console.log('Auto-detected Talon path:', talonPath);
         }
         if (talonPath && fs.existsSync(talonPath)) {
-            console.log('Starting background import from:', talonPath);
             // Import in background without blocking activation (refresh = clear existing first)
             importTalonFiles(context, talonPath, true).catch(err => {
                 console.error('Background import failed:', err);
                 vscode.window.showErrorMessage(`Failed to import Talon files: ${err.message}`);
             });
         } else {
-            console.log('Talon path not found or does not exist:', talonPath);
-            console.log('Environment info:', {
-                platform: process.platform,
-                APPDATA: process.env.APPDATA,
-                USERPROFILE: process.env.USERPROFILE,
-                HOME: process.env.HOME
-            });
         }
     } else {
-        console.log('Auto-indexing is disabled');
     }
 }
 
@@ -194,7 +177,6 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                 switch (message.command) {
                     case 'search':
                         if (!db) {
-                            console.log('[Search] Database not initialized');
                             searchPanel?.webview.postMessage({
                                 command: 'searchResults',
                                 results: []
@@ -205,24 +187,10 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             });
                             break;
                         }
-                        console.log('[Search] Performing search with:', {
-                            searchTerm: message.searchTerm,
-                            searchScope: message.searchScope,
-                            searchScopeType: typeof message.searchScope,
-                            application: message.application,
-                            mode: message.mode,
-                            repository: message.repository,
-                            tags: message.tags,
-                            operatingSystem: message.operatingSystem,
-                            maxResults: message.maxResults,
-                            preferredApplications: message.preferredApplications,
-                            excludedOperatingSystems: message.excludedOperatingSystems
-                        });
                         
                         // Ensure searchScope is a number - be careful with 0 being falsy
                         const searchScope = typeof message.searchScope === 'number' ? message.searchScope : 
                                           (message.searchScope !== undefined && message.searchScope !== null ? parseInt(message.searchScope) : 2);
-                        console.log('[Search] Normalized searchScope:', searchScope);
                         
                         const results = db.searchCommands(
                             message.searchTerm || '',
@@ -237,7 +205,6 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             message.preferredApplications,
                             message.excludedOperatingSystems
                         );
-                        console.log('[Search] Found', results.length, 'results');
                         searchPanel?.webview.postMessage({
                             command: 'searchResults',
                             results: results
@@ -245,23 +212,16 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                         break;
                     case 'searchLists':
                         if (!db) {
-                            console.log('[List Search] Database not initialized');
                             searchPanel?.webview.postMessage({
                                 command: 'listSearchResults',
                                 results: []
                             });
                             return;
                         }
-                        console.log('[List Search] Performing list search with:', {
-                            searchTerm: message.searchTerm,
-                            maxResults: message.maxResults
-                        });
-                        
                         const listResults = db.searchListItems(
                             message.searchTerm || '',
                             message.maxResults || 500
                         );
-                        console.log('[List Search] Found', listResults.length, 'results');
                         searchPanel?.webview.postMessage({
                             command: 'listSearchResults',
                             results: listResults
@@ -269,7 +229,6 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                         break;
                     case 'getStats':
                         if (!db) {
-                            console.log('[Stats] Database not initialized');
                             searchPanel?.webview.postMessage({
                                 command: 'stats',
                                 totalCommands: 0,
@@ -286,7 +245,6 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                         const filters = db.getFilterValues();
                         const repositoryBreakdown = db.getRepositoryBreakdown();
                         const listNames = db.getListNames();
-                        console.log('[Stats] Command count:', count, 'List count:', listCount, 'Filter values:', filters, 'Repository breakdown:', repositoryBreakdown);
                         searchPanel?.webview.postMessage({
                             command: 'stats',
                             totalCommands: count,
@@ -302,7 +260,6 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                         const searchDebounceMs = config.get<number>('searchDebounceMs', 3000);
                         const defaultApplications = config.get<string[]>('defaultApplications') || [];
                         const excludedOperatingSystems = config.get<string[]>('excludedOperatingSystems') || [];
-                        console.log('[Config] Sending config to webview:', { searchDebounceMs });
                         searchPanel?.webview.postMessage({
                             command: 'config',
                             config: {
@@ -357,7 +314,6 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                         }
                         break;
                     case 'log':
-                        console.log('[Webview]', message.text);
                         break;
                     case 'error':
                         console.error('[Webview Error]', message.text);
@@ -422,7 +378,6 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
 }
 
 async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: string, isRefresh: boolean = true) {
-    console.log('importTalonFiles called with rootFolder:', rootFolder);
     return vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         title: "Importing Talon files",
@@ -432,7 +387,6 @@ async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: st
 
         const files = await getTalonFiles(rootFolder);
         const listFiles = await getTalonListFiles(rootFolder);
-        console.log(`Found ${files.length} .talon files and ${listFiles.length} .talon-list files`);
         
         progress.report({ increment: 30, message: `Found ${files.length} .talon files and ${listFiles.length} list files` });
 
@@ -483,11 +437,9 @@ async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: st
             progress.report({ increment: 80, message: `Refreshing database with ${allCommands.length} commands and ${allListItems.length} list items (clearing old ones)...` });
 
             // Clear existing data and insert new ones to avoid duplicates
-            console.log(`Refreshing database with ${allCommands.length} commands and ${allListItems.length} list items (clearing existing first)`);
             db.refreshCommandsBatch(allCommands);
             db.refreshListItemsBatch(allListItems);
 
-            console.log(`Refresh complete. Total commands: ${db.getCommandCount()}, Total list items: ${db.getListCount()}`);
             progress.report({ increment: 100, message: "Refresh complete" });
 
             vscode.window.showInformationMessage(`Refreshed index with ${allCommands.length} commands and ${allListItems.length} list items. Total in database: ${db.getCommandCount()} commands, ${db.getListCount()} list items`);
@@ -495,11 +447,9 @@ async function importTalonFiles(context: vscode.ExtensionContext, rootFolder: st
             progress.report({ increment: 80, message: `Adding ${allCommands.length} commands and ${allListItems.length} list items to database...` });
 
             // Add items to existing ones
-            console.log(`Adding ${allCommands.length} commands and ${allListItems.length} list items to database`);
             db.insertCommandsBatch(allCommands);
             db.insertListItemsBatch(allListItems);
 
-            console.log(`Import complete. Total commands: ${db.getCommandCount()}, Total list items: ${db.getListCount()}`);
             progress.report({ increment: 100, message: "Import complete" });
 
             vscode.window.showInformationMessage(`Added ${allCommands.length} commands and ${allListItems.length} list items. Total in database: ${db.getCommandCount()} commands, ${db.getListCount()} list items`);
@@ -621,17 +571,12 @@ async function autoDetectTalonPath(): Promise<string | undefined> {
         path.join(process.env.HOME || '', 'talon', 'user')
     ];
 
-    console.log('Checking Talon paths:', possiblePaths);
-    
     for (const testPath of possiblePaths) {
-        console.log(`Checking path: ${testPath}`);
         if (fs.existsSync(testPath)) {
-            console.log(`Found Talon user folder at: ${testPath}`);
             return testPath;
         }
     }
 
-    console.log('No Talon user folder found in standard locations');
     return undefined;
 }
 
