@@ -1,6 +1,6 @@
 // Talon Command Search - Webview UI (communicates with SQLite backend via extension host)
 
-(function() {
+(function () {
     const vscode = acquireVsCodeApi();
     let currentFilters = {
         applications: [],
@@ -31,13 +31,27 @@
                         type: "capture",
                         description: "Window snapping positions for window management",
                         examples: [
-                            { spoken: "snap left", description: "Snap window to left half of screen" },
-                            { spoken: "snap right", description: "Snap window to right half of screen" },
-                            { spoken: "snap up", description: "Snap window to top half of screen" },
-                            { spoken: "snap down", description: "Snap window to bottom half of screen" },
+                            { spoken: "snap full", description: "Snap window to fill the entire screen" },
                             { spoken: "snap maximize", description: "Maximize window" },
                             { spoken: "snap minimize", description: "Minimize window" },
-                            { spoken: "snap center", description: "Center window on screen" }
+                            { spoken: "snap restore", description: "Restore window to previous size" },
+                            { spoken: "snap left", description: "Snap window to left half of screen" },
+                            { spoken: "snap right", description: "Snap window to right half of screen" },
+                            { spoken: "snap top", description: "Snap window to top half of screen" },
+                            { spoken: "snap bottom", description: "Snap window to bottom half of screen" },
+                            { spoken: "snap top left", description: "Snap window to top-left quadrant" },
+                            { spoken: "snap top right", description: "Snap window to top-right quadrant" },
+                            { spoken: "snap bottom left", description: "Snap window to bottom-left quadrant" },
+                            { spoken: "snap bottom right", description: "Snap window to bottom-right quadrant" },
+                            { spoken: "snap center", description: "Center window on screen" },
+                            { spoken: "snap half left", description: "Snap window to left half of screen" },
+                            { spoken: "snap half right", description: "Snap window to right half of screen" },
+                            { spoken: "snap quarter top left", description: "Snap window to top-left quarter" },
+                            { spoken: "snap quarter top right", description: "Snap window to top-right quarter" },
+                            { spoken: "snap quarter bottom left", description: "Snap window to bottom-left quarter" },
+                            { spoken: "snap quarter bottom right", description: "Snap window to bottom-right quarter" },
+                            { spoken: "snap third left", description: "Snap window to left third of screen" },
+                            { spoken: "snap third right", description: "Snap window to right third of screen" }
                         ]
                     },
                     {
@@ -279,23 +293,23 @@
             clearTimeout(searchTimeout);
             searchTimeout = null;
         }
-        
+
         // Show visual feedback that search is pending
         showSearchPending();
-        
+
         // Debounce search requests
         searchTimeout = setTimeout(() => {
             performSearchImmediate();
         }, searchDebounceMs);
     }
-    
+
     function performSearchImmediate() {
         // Prevent multiple concurrent searches
         if (isSearching) {
             console.log('[Search] Search already in progress, skipping');
             return;
         }
-        
+
         const searchTerm = document.getElementById('searchInput')?.value.trim() || '';
         const scopeElement = document.getElementById('searchScope');
         const searchScope = scopeElement ? parseInt(scopeElement.value) : 2;
@@ -305,7 +319,7 @@
         const tags = document.getElementById('filterTags')?.value || undefined;
         const title = document.getElementById('filterTitle')?.value || undefined;
         const operatingSystem = document.getElementById('filterOperatingSystem')?.value || undefined;
-        
+
         // Create search parameters object
         const searchParams = {
             searchTerm: searchTerm,
@@ -318,16 +332,16 @@
             operatingSystem: operatingSystem === '' ? undefined : operatingSystem,
             maxResults: 500
         };
-        
+
         // Check if this is the same search as the last one
         if (lastSearchParams && JSON.stringify(searchParams) === JSON.stringify(lastSearchParams)) {
             console.log('[Search] Same search parameters as last search, skipping');
             return;
         }
-        
+
         lastSearchParams = { ...searchParams };
         isSearching = true;
-        
+
         // Show spinner with contextual message
         let spinnerMessage = 'Searching commands...';
         if (searchTerm) {
@@ -336,9 +350,9 @@
             spinnerMessage = 'Applying filters...';
         }
         showSearchSpinner(spinnerMessage);
-        
+
         console.log('[Search] Performing search:', { searchTerm, searchScope, scopeValue: scopeElement?.value, application, mode, repository, title });
-        
+
         vscode.postMessage({
             command: 'search',
             ...searchParams
@@ -348,16 +362,16 @@
     // Request list search from extension host
     function performListSearch() {
         const searchTerm = document.getElementById('listSearchInput')?.value.trim() || '';
-        
+
         // Show spinner with contextual message
         let spinnerMessage = 'Searching lists...';
         if (searchTerm) {
             spinnerMessage = `Searching lists for "${searchTerm}"...`;
         }
         showListSearchSpinner(spinnerMessage);
-        
+
         console.log('[ListSearch] Performing list search:', { searchTerm });
-        
+
         vscode.postMessage({
             command: 'searchLists',
             searchTerm: searchTerm,
@@ -369,23 +383,23 @@
     function displayListResults(results) {
         // Hide spinner
         hideListSearchSpinner();
-        
+
         const resultsDiv = document.getElementById('listResults');
         if (!resultsDiv) return;
-        
+
         resultsDiv.innerHTML = '';
-        
+
         if (results.length === 0) {
             resultsDiv.innerHTML = '<p class="no-results">No list items found. Try importing your Talon files first (Talon: Refresh Index)</p>';
             return;
         }
-        
+
         // Add result count header
         const header = document.createElement('div');
         header.className = 'results-header';
         header.textContent = `Found ${results.length} list item${results.length !== 1 ? 's' : ''}`;
         resultsDiv.appendChild(header);
-        
+
         // Group results by list name
         const groupedResults = {};
         results.forEach(item => {
@@ -394,11 +408,11 @@
             }
             groupedResults[item.listName].push(item);
         });
-        
+
         // Display grouped results
         Object.keys(groupedResults).sort().forEach(listName => {
             const items = groupedResults[listName];
-            
+
             // Create list group header
             const groupHeader = document.createElement('div');
             groupHeader.className = 'list-group-header';
@@ -407,28 +421,28 @@
                 <span class="list-count">${items.length} item${items.length !== 1 ? 's' : ''}</span>
             `;
             resultsDiv.appendChild(groupHeader);
-            
+
             // Create compact list container instead of table
             const listContainer = document.createElement('div');
             listContainer.className = 'list-items-container';
-            
+
             items.forEach(item => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'list-item-compact';
-                
+
                 // Create compact single line format: "spoken_form → list_value (source)"
                 const spokenSpan = document.createElement('span');
                 spokenSpan.className = 'spoken-form-compact';
                 spokenSpan.textContent = item.spokenForm;
-                
+
                 const arrowSpan = document.createElement('span');
                 arrowSpan.className = 'arrow';
                 arrowSpan.textContent = ' → ';
-                
+
                 const valueSpan = document.createElement('span');
                 valueSpan.className = 'list-value-compact';
                 valueSpan.textContent = item.listValue;
-                
+
                 const sourceSpan = document.createElement('span');
                 sourceSpan.className = 'source-compact';
                 if (item.sourceFile) {
@@ -443,15 +457,15 @@
                 } else {
                     sourceSpan.textContent = '';
                 }
-                
+
                 itemDiv.appendChild(spokenSpan);
                 itemDiv.appendChild(arrowSpan);
                 itemDiv.appendChild(valueSpan);
                 itemDiv.appendChild(sourceSpan);
-                
+
                 listContainer.appendChild(itemDiv);
             });
-            
+
             resultsDiv.appendChild(listContainer);
         });
     }
@@ -460,7 +474,7 @@
     function performCaptureSearch() {
         const searchTerm = document.getElementById('captureSearchInput')?.value.trim().toLowerCase() || '';
         console.log('[CaptureSearch] Performing capture search:', { searchTerm });
-        
+
         displayCaptureResults(searchTerm);
     }
 
@@ -468,19 +482,19 @@
     function displayCaptureResults(searchTerm = '') {
         const resultsDiv = document.getElementById('captureResults');
         if (!resultsDiv) return;
-        
+
         resultsDiv.innerHTML = '';
-        
+
         if (capturesData.length === 0) {
             resultsDiv.innerHTML = '<p class="no-results">Captures & Lists data not loaded.</p>';
             return;
         }
-        
+
         let totalMatches = 0;
-        
+
         capturesData.forEach(category => {
             const categoryMatches = [];
-            
+
             category.captures.forEach(capture => {
                 if (!searchTerm) {
                     // No search term - show all
@@ -489,20 +503,20 @@
                     // Check if capture name, description, or any example matches search term
                     const nameMatch = capture.name.toLowerCase().includes(searchTerm);
                     const descMatch = capture.description.toLowerCase().includes(searchTerm);
-                    const exampleMatch = capture.examples.some(ex => 
-                        ex.spoken.toLowerCase().includes(searchTerm) || 
+                    const exampleMatch = capture.examples.some(ex =>
+                        ex.spoken.toLowerCase().includes(searchTerm) ||
                         ex.description.toLowerCase().includes(searchTerm)
                     );
-                    
+
                     if (nameMatch || descMatch || exampleMatch) {
                         categoryMatches.push(capture);
                     }
                 }
             });
-            
+
             if (categoryMatches.length > 0) {
                 totalMatches += categoryMatches.reduce((count, capture) => count + capture.examples.length, 0);
-                
+
                 // Create category header
                 const categoryHeader = document.createElement('div');
                 categoryHeader.className = 'capture-category-header';
@@ -511,12 +525,12 @@
                     <p class="capture-category-description">${escapeHtml(category.description)}</p>
                 `;
                 resultsDiv.appendChild(categoryHeader);
-                
+
                 // Create captures in this category
                 categoryMatches.forEach(capture => {
                     const captureGroup = document.createElement('div');
                     captureGroup.className = `capture-group capture-type-${capture.type}`;
-                    
+
                     const groupHeader = document.createElement('div');
                     groupHeader.className = 'capture-group-header';
                     groupHeader.innerHTML = `
@@ -524,17 +538,17 @@
                         <span class="capture-type-badge capture-type-${capture.type}">${capture.type}</span>
                         <span class="capture-toggle">▼</span>
                     `;
-                    
+
                     const description = document.createElement('div');
                     description.className = 'capture-description';
                     description.innerHTML = highlightSearchTerm(capture.description, searchTerm);
-                    
+
                     const content = document.createElement('div');
                     content.className = 'capture-content';
-                    
+
                     const examplesDiv = document.createElement('div');
                     examplesDiv.className = 'capture-examples';
-                    
+
                     capture.examples.forEach(example => {
                         const exampleDiv = document.createElement('div');
                         exampleDiv.className = 'capture-example';
@@ -544,22 +558,22 @@
                         `;
                         examplesDiv.appendChild(exampleDiv);
                     });
-                    
+
                     content.appendChild(examplesDiv);
                     captureGroup.appendChild(groupHeader);
                     captureGroup.appendChild(description);
                     captureGroup.appendChild(content);
-                    
+
                     // Add click handler for collapsible groups
                     groupHeader.addEventListener('click', () => {
                         captureGroup.classList.toggle('collapsed');
                     });
-                    
+
                     resultsDiv.appendChild(captureGroup);
                 });
             }
         });
-        
+
         // Add results header if we found matches
         if (totalMatches > 0) {
             const header = document.createElement('div');
@@ -578,7 +592,7 @@
     // Highlight search terms in text
     function highlightSearchTerm(text, searchTerm) {
         if (!searchTerm) return escapeHtml(text);
-        
+
         const escapedText = escapeHtml(text);
         const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
         return escapedText.replace(regex, '<span class="search-highlight">$1</span>');
@@ -594,7 +608,7 @@
         const spinner = document.getElementById('searchSpinner');
         const results = document.getElementById('results');
         const spinnerText = spinner?.querySelector('.spinner-text');
-        
+
         if (spinner) {
             spinner.classList.add('visible', 'pending');
         }
@@ -604,12 +618,12 @@
             spinnerText.textContent = `Search will start in ${delaySeconds}s (typing to reset delay)...`;
         }
     }
-    
+
     function showSearchSpinner(message = 'Searching commands...') {
         const spinner = document.getElementById('searchSpinner');
         const results = document.getElementById('results');
         const spinnerText = spinner?.querySelector('.spinner-text');
-        
+
         if (spinner) {
             spinner.classList.add('visible');
             spinner.classList.remove('pending'); // Remove pending state when actually searching
@@ -617,24 +631,24 @@
         if (results) results.style.display = 'none';
         if (spinnerText) spinnerText.textContent = message;
     }
-    
+
     function hideSearchSpinner() {
         const spinner = document.getElementById('searchSpinner');
         const results = document.getElementById('results');
         if (spinner) spinner.classList.remove('visible', 'pending');
         if (results) results.style.display = 'grid';
     }
-    
+
     function showListSearchSpinner(message = 'Searching lists...') {
         const spinner = document.getElementById('listSearchSpinner');
         const results = document.getElementById('listResults');
         const spinnerText = spinner?.querySelector('.spinner-text');
-        
+
         if (spinner) spinner.classList.add('visible');
         if (results) results.style.display = 'none';
         if (spinnerText) spinnerText.textContent = message;
     }
-    
+
     function hideListSearchSpinner() {
         const spinner = document.getElementById('listSearchSpinner');
         const results = document.getElementById('listResults');
@@ -647,49 +661,49 @@
         // Mark search as complete and hide spinner
         isSearching = false;
         hideSearchSpinner();
-        
+
         const resultsDiv = document.getElementById('results');
         if (!resultsDiv) return;
-        
+
         resultsDiv.innerHTML = '';
-        
+
         if (results.length === 0) {
             resultsDiv.innerHTML = '<p class="no-results">No commands found. Try importing your Talon files first (Talon: Refresh Index)</p>';
             return;
         }
-        
+
         // Add result count header
         const header = document.createElement('div');
         header.className = 'results-header';
         header.textContent = `Found ${results.length} command${results.length !== 1 ? 's' : ''}`;
         resultsDiv.appendChild(header);
-        
+
         results.forEach(cmd => {
             const card = document.createElement('div');
             card.className = 'command-card';
-            
+
             const headerDiv = document.createElement('div');
             headerDiv.className = 'command-header';
             headerDiv.innerHTML = `
                 <strong>${escapeHtml(cmd.command)}</strong>
                 <span class="app-badge">${escapeHtml(cmd.application || 'global')}</span>
             `;
-            
+
             const script = document.createElement('pre');
             script.className = 'command-script';
             script.textContent = cmd.script;
-            
+
             const footer = document.createElement('div');
             footer.className = 'command-footer';
             footer.innerHTML = `
                 ${cmd.repository ? `<span class="clickable-repo-label" data-repo="${escapeHtml(cmd.repository)}" title="Click to filter by ${escapeHtml(cmd.repository)}">📁 ${escapeHtml(cmd.repository)}</span>` : ''}
                 ${cmd.mode ? `<span>🎯 ${escapeHtml(cmd.mode)}</span>` : ''}
             `;
-            
+
             card.appendChild(headerDiv);
             card.appendChild(script);
             card.appendChild(footer);
-            
+
             // Add click handler for opening file (but prevent on repository clicks)
             card.addEventListener('click', (e) => {
                 // Don't open file if clicking on repository label
@@ -697,7 +711,7 @@
                     vscode.postMessage({ command: 'openFile', filePath: cmd.filePath });
                 }
             });
-            
+
             // Add click handler for repository labels in footer
             const repoLabel = footer.querySelector('.clickable-repo-label');
             if (repoLabel) {
@@ -707,7 +721,7 @@
                     filterByRepository(repoValue);
                 });
             }
-            
+
             resultsDiv.appendChild(card);
         });
     }
@@ -715,7 +729,7 @@
     // Tab switching functionality
     function switchTab(tabName) {
         currentTab = tabName;
-        
+
         // Update tab buttons
         document.querySelectorAll('.tab-button').forEach(btn => {
             btn.classList.remove('active');
@@ -723,20 +737,20 @@
                 btn.classList.add('active');
             }
         });
-        
+
         // Update tab content
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
-        
+
         const targetTab = document.getElementById(tabName + 'Tab');
         if (targetTab) {
             targetTab.classList.add('active');
         }
-        
+
         // Set focus on the search input for the new active tab
         setFocusOnActiveTab();
-        
+
         // Trigger appropriate search based on current tab
         if (tabName === 'commands') {
             if (totalCommands > 0) {
@@ -759,7 +773,7 @@
         if (statsDiv) {
             const currentRepoFilter = document.getElementById('filterRepository')?.value || '';
             let html = `<div class="stats-total">Total commands: ${total}</div>`;
-            
+
             // Show active filter if any
             if (currentRepoFilter) {
                 const filterName = currentRepoFilter || 'No Repository';
@@ -768,16 +782,16 @@
                     <span class="clear-filter" onclick="clearRepositoryFilter()" title="Clear filter">✖</span>
                 </div>`;
             }
-            
+
             if (repositoryBreakdown && Object.keys(repositoryBreakdown).length > 0) {
                 html += '<div class="stats-breakdown">';
                 html += '<h4 title="Click on any repository below to filter results">Commands by Repository (click to filter):</h4>';
                 html += '<div class="repo-stats-container">';
-                
+
                 // Sort repositories by command count (descending)
                 const sortedRepos = Object.entries(repositoryBreakdown)
                     .sort((a, b) => b[1] - a[1]);
-                
+
                 sortedRepos.forEach(([repo, count]) => {
                     const repoName = repo || 'No Repository';
                     const repoValue = repo || '';
@@ -788,9 +802,9 @@
                 });
                 html += '</div></div>';
             }
-            
+
             statsDiv.innerHTML = html;
-            
+
             // Add click handlers for repository stats
             statsDiv.querySelectorAll('.clickable-repo').forEach(element => {
                 element.addEventListener('click', () => {
@@ -798,16 +812,16 @@
                     filterByRepository(repoValue);
                 });
             });
-            
+
             // Maintain visual state for selected repository
             updateRepositoryHighlight(currentRepoFilter);
         }
-        
+
         // Update list stats
         const listStatsDiv = document.getElementById('listStats');
         if (listStatsDiv) {
             let listHtml = `<div class="stats-total">Total list items: ${totalLists}</div>`;
-            
+
             if (listNames.length > 0) {
                 listHtml += '<div class="stats-breakdown">';
                 listHtml += `<h4 class="collapsible-header" data-toggle="listNames">
@@ -815,16 +829,16 @@
                     Available Lists (${listNames.length}):
                 </h4>`;
                 listHtml += '<div class="list-names-container collapsed" data-container="listNames">';
-                
+
                 listNames.forEach(listName => {
                     listHtml += `<span class="list-name-tag clickable-list-filter" data-list="${escapeHtml(listName)}" title="Click to filter by ${escapeHtml(listName)}">${escapeHtml(listName)}</span>`;
                 });
-                
+
                 listHtml += '</div></div>';
             }
-            
+
             listStatsDiv.innerHTML = listHtml;
-            
+
             // Add click handlers for list name filters
             listStatsDiv.querySelectorAll('.clickable-list-filter').forEach(element => {
                 element.addEventListener('click', () => {
@@ -832,14 +846,14 @@
                     filterByListName(listName);
                 });
             });
-            
+
             // Add click handler for toggle header
             const toggleHeader = listStatsDiv.querySelector('.collapsible-header');
             if (toggleHeader) {
                 toggleHeader.addEventListener('click', () => {
                     const container = listStatsDiv.querySelector('[data-container="listNames"]');
                     const toggle = toggleHeader.querySelector('.toggle-icon');
-                    
+
                     if (container && toggle) {
                         if (container.classList.contains('collapsed')) {
                             container.classList.remove('collapsed');
@@ -856,17 +870,17 @@
 
     function updateFilters(filters) {
         currentFilters = filters;
-        
+
         // Update filter dropdowns if they exist
         const appFilter = document.getElementById('filterApplication');
         const modeFilter = document.getElementById('filterMode');
         const repoFilter = document.getElementById('filterRepository');
         const titleFilter = document.getElementById('filterTitle');
-        
+
         if (appFilter) {
             appFilter.innerHTML = '<option value="">All Applications</option>';
             // Sort applications alphabetically
-            const sortedApplications = [...filters.applications].sort((a, b) => 
+            const sortedApplications = [...filters.applications].sort((a, b) =>
                 a.toLowerCase().localeCompare(b.toLowerCase())
             );
             sortedApplications.forEach(app => {
@@ -876,11 +890,11 @@
                 appFilter.appendChild(option);
             });
         }
-        
+
         if (modeFilter) {
             modeFilter.innerHTML = '<option value="">All Modes</option>';
             // Sort modes alphabetically
-            const sortedModes = [...filters.modes].sort((a, b) => 
+            const sortedModes = [...filters.modes].sort((a, b) =>
                 a.toLowerCase().localeCompare(b.toLowerCase())
             );
             sortedModes.forEach(mode => {
@@ -890,11 +904,11 @@
                 modeFilter.appendChild(option);
             });
         }
-        
+
         if (repoFilter) {
             repoFilter.innerHTML = '<option value="">All Repositories</option>';
             // Sort repositories alphabetically
-            const sortedRepositories = [...filters.repositories].sort((a, b) => 
+            const sortedRepositories = [...filters.repositories].sort((a, b) =>
                 a.toLowerCase().localeCompare(b.toLowerCase())
             );
             sortedRepositories.forEach(repo => {
@@ -904,11 +918,11 @@
                 repoFilter.appendChild(option);
             });
         }
-        
+
         if (titleFilter) {
             titleFilter.innerHTML = '<option value="">All Titles</option>';
             // Sort titles alphabetically
-            const sortedTitles = [...filters.titles].sort((a, b) => 
+            const sortedTitles = [...filters.titles].sort((a, b) =>
                 a.toLowerCase().localeCompare(b.toLowerCase())
             );
             sortedTitles.forEach(title => {
@@ -918,12 +932,12 @@
                 titleFilter.appendChild(option);
             });
         }
-        
+
         const tagsFilter = document.getElementById('filterTags');
         if (tagsFilter) {
             tagsFilter.innerHTML = '<option value="">All Tags</option>';
             // Sort tags alphabetically
-            const sortedTags = [...filters.tags].sort((a, b) => 
+            const sortedTags = [...filters.tags].sort((a, b) =>
                 a.toLowerCase().localeCompare(b.toLowerCase())
             );
             sortedTags.forEach(tag => {
@@ -933,12 +947,12 @@
                 tagsFilter.appendChild(option);
             });
         }
-        
+
         const osFilter = document.getElementById('filterOperatingSystem');
         if (osFilter) {
             osFilter.innerHTML = '<option value="">All Operating Systems</option>';
             // Sort operating systems alphabetically
-            const sortedOS = [...filters.operatingSystems].sort((a, b) => 
+            const sortedOS = [...filters.operatingSystems].sort((a, b) =>
                 a.toLowerCase().localeCompare(b.toLowerCase())
             );
             sortedOS.forEach(os => {
@@ -952,7 +966,7 @@
 
     function filterByRepository(repository) {
         console.log('[Filter] Filtering by repository:', repository);
-        
+
         const repoFilter = document.getElementById('filterRepository');
         if (repoFilter) {
             // If clicking on the same repository that's already selected, clear the filter
@@ -963,10 +977,10 @@
             } else {
                 repoFilter.value = repository;
             }
-            
+
             // Update the visual state in the stats
             updateRepositoryHighlight(repository);
-            
+
             // Trigger search with the updated filter
             performSearch();
         }
@@ -979,7 +993,7 @@
             statsDiv.querySelectorAll('.repo-stat').forEach(stat => {
                 stat.classList.remove('selected-repo');
             });
-            
+
             // Highlight the selected repository (if any)
             if (selectedRepository) {
                 const selectedRepo = statsDiv.querySelector(`[data-repo="${selectedRepository}"]`);
@@ -991,7 +1005,7 @@
     }
 
     // Make clearRepositoryFilter globally accessible
-    window.clearRepositoryFilter = function() {
+    window.clearRepositoryFilter = function () {
         const repoFilter = document.getElementById('filterRepository');
         if (repoFilter) {
             repoFilter.value = '';
@@ -1005,7 +1019,7 @@
     // Filter by list name
     function filterByListName(listName) {
         console.log('[Filter] Filtering by list name:', listName);
-        
+
         const searchInput = document.getElementById('listSearchInput');
         if (searchInput) {
             // If clicking on the same list that's already being searched, clear the filter
@@ -1015,7 +1029,7 @@
             } else {
                 searchInput.value = listName;
             }
-            
+
             // Trigger search with the updated filter
             performListSearch();
         }
@@ -1030,21 +1044,21 @@
     // Initialize UI
     function init() {
         console.log('[Init] Initializing webview...');
-        
+
         // Initialize captures and lists data
         initializeCapturesData();
         console.log('[Init] Captures & Lists data initialized with', capturesData.length, 'categories');
-        
+
         // Setup event listeners
         setupEventListeners();
-        
+
         // Set focus on the search input for the current active tab
         setFocusOnActiveTab();
-        
+
         // Request configuration and initial stats
         vscode.postMessage({ command: 'getConfig' });
         vscode.postMessage({ command: 'getStats' });
-        
+
         // Perform initial search based on current tab
         setTimeout(() => {
             if (currentTab === 'commands' && totalCommands > 0) {
@@ -1083,7 +1097,7 @@
     // Setup event listeners (moved to a function to be called after DOM is ready)
     function setupEventListeners() {
         console.log('[Init] Setting up event listeners...');
-        
+
         // Search and filter event listeners
         const searchInput = document.getElementById('searchInput');
         const searchScope = document.getElementById('searchScope');
@@ -1091,27 +1105,27 @@
         const filterMode = document.getElementById('filterMode');
         const filterRepository = document.getElementById('filterRepository');
         const filterTitle = document.getElementById('filterTitle');
-        
+
         if (searchInput) {
             searchInput.addEventListener('input', performSearch);
             console.log('[Init] Search input listener attached');
         }
-        
+
         if (searchScope) {
             searchScope.addEventListener('change', performSearch);
             console.log('[Init] Search scope listener attached');
         }
-        
+
         if (filterApplication) {
             filterApplication.addEventListener('change', performSearch);
             console.log('[Init] Application filter listener attached');
         }
-        
+
         if (filterMode) {
             filterMode.addEventListener('change', performSearch);
             console.log('[Init] Mode filter listener attached');
         }
-        
+
         if (filterRepository) {
             filterRepository.addEventListener('change', (e) => {
                 const selectedRepo = e.target.value;
@@ -1120,18 +1134,18 @@
             });
             console.log('[Init] Repository filter listener attached');
         }
-        
+
         if (filterTitle) {
             filterTitle.addEventListener('change', performSearch);
             console.log('[Init] Title filter listener attached');
         }
-        
+
         const filterTags = document.getElementById('filterTags');
         if (filterTags) {
             filterTags.addEventListener('change', performSearch);
             console.log('[Init] Tags filter listener attached');
         }
-        
+
         const filterOperatingSystem = document.getElementById('filterOperatingSystem');
         if (filterOperatingSystem) {
             filterOperatingSystem.addEventListener('change', performSearch);
@@ -1142,14 +1156,14 @@
         const checkDbBtn = document.getElementById('checkDbBtn');
         const clearDbBtn = document.getElementById('clearDbBtn');
         const refreshBtn = document.getElementById('refreshBtn');
-        
+
         if (checkDbBtn) {
             checkDbBtn.addEventListener('click', () => {
                 console.log('[CheckDB] Button clicked, totalCommands:', totalCommands);
-                
+
                 // Send message to extension to show info via VS Code notification
-                vscode.postMessage({ 
-                    command: 'showInfo', 
+                vscode.postMessage({
+                    command: 'showInfo',
                     message: `Database contains ${totalCommands} commands.\n\nDatabase: JSON file storage\nLocation: Extension global storage`
                 });
             });
@@ -1162,17 +1176,17 @@
             clearDbBtn.addEventListener('click', () => {
                 console.log('[ClearDB] Button clicked, totalCommands:', totalCommands);
                 if (totalCommands === 0) {
-                    vscode.postMessage({ 
-                        command: 'showInfo', 
+                    vscode.postMessage({
+                        command: 'showInfo',
                         message: 'Database is already empty.'
                     });
                     return;
                 }
-                
+
                 // Send message to extension to show confirmation dialog via VS Code
-                vscode.postMessage({ 
-                    command: 'confirmClearDatabase', 
-                    commandCount: totalCommands 
+                vscode.postMessage({
+                    command: 'confirmClearDatabase',
+                    commandCount: totalCommands
                 });
             });
             console.log('[Init] Clear DB button handler attached');
@@ -1189,7 +1203,7 @@
         } else {
             console.error('[Init] Refresh button not found!');
         }
-        
+
         // Tab button handlers
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', () => {
@@ -1199,14 +1213,14 @@
                 }
             });
         });
-        
+
         // List search input handler
         const listSearchInput = document.getElementById('listSearchInput');
         if (listSearchInput) {
             listSearchInput.addEventListener('input', performListSearch);
             console.log('[Init] List search input listener attached');
         }
-        
+
         // Clear list search button handler
         const clearListSearchBtn = document.getElementById('clearListSearch');
         if (clearListSearchBtn) {
@@ -1219,14 +1233,14 @@
             });
             console.log('[Init] Clear list search button listener attached');
         }
-        
+
         // Capture search input handler
         const captureSearchInput = document.getElementById('captureSearchInput');
         if (captureSearchInput) {
             captureSearchInput.addEventListener('input', performCaptureSearch);
             console.log('[Init] Capture search input listener attached');
         }
-        
+
         // Clear capture search button handler
         const clearCaptureSearchBtn = document.getElementById('clearCaptureSearch');
         if (clearCaptureSearchBtn) {
@@ -1245,7 +1259,7 @@
     window.addEventListener('message', (event) => {
         const message = event.data;
         console.log('[Webview] Received message:', message.command);
-        
+
         switch (message.command) {
             case 'searchResults':
                 console.log('[Webview] Displaying', message.results.length, 'results');
@@ -1256,7 +1270,7 @@
                     isSearching = false;
                 }
                 break;
-                
+
             case 'stats':
                 console.log('[Webview] Stats:', message.totalCommands, 'commands,', message.totalLists, 'list items');
                 updateStats(message.totalCommands, message.repositoryBreakdown, message.totalLists, message.listNames);
@@ -1269,24 +1283,24 @@
                     performCaptureSearch();
                 }
                 break;
-                
+
             case 'listSearchResults':
                 console.log('[Webview] Displaying', message.results.length, 'list results');
                 displayListResults(message.results);
                 break;
-                
+
             case 'importComplete':
                 console.log('[Webview] Import complete:', message.imported, 'commands');
                 vscode.postMessage({ command: 'getStats' });
                 break;
-                
+
             case 'setSearchScope':
                 const scopeSelect = document.getElementById('searchScope');
                 if (scopeSelect) {
                     scopeSelect.value = message.scope.toString();
                 }
                 break;
-                
+
             case 'config':
                 console.log('[Webview] Received config:', message.config);
                 if (message.config.searchDebounceMs !== undefined) {
@@ -1294,14 +1308,14 @@
                     console.log('[Webview] Search debounce set to:', searchDebounceMs, 'ms');
                 }
                 break;
-                
+
             case 'error':
                 console.error('[Webview] Error from extension:', message.message);
                 // Hide spinners and mark search as complete
                 isSearching = false;
                 hideSearchSpinner();
                 hideListSearchSpinner();
-                
+
                 const resultsDiv = document.getElementById('results');
                 if (resultsDiv) {
                     resultsDiv.innerHTML = `<p class="error-message">⚠️ ${message.message}</p>`;
