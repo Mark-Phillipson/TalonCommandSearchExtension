@@ -2,6 +2,10 @@
 
 🎯 Search and browse 27,000+ Talon Voice commands and lists with lightning-fast performance, advanced filtering, and dedicated list search capabilities.
 
+> **⚠️ AI Disclosure**: This extension was developed with assistance from AI tools (GitHub Copilot and Claude AI). While thoroughly tested and functional, users should be aware that AI-generated code was used in its creation. Please report any issues or concerns through the project's issue tracker.
+>
+> **🔒 File Access Policy**: This extension only **reads** your Talon files (.talon, .talon-list, .py). It never writes to, modifies, or deletes any of your Talon Voice files or Python scripts. All file access is read-only for indexing and search purposes only.
+
 ## ✨ Features
 
 - **⚡ Lightning Fast JSON Storage**: Handles massive datasets (27k+ commands) with optimized in-memory search
