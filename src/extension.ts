@@ -728,7 +728,7 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
                 <div class="stats-total">Common Talon Captures & Lists Reference</div>
                 <p style="color: var(--vscode-descriptionForeground); font-size: 12px; margin: 8px 0;">
                     This tab shows commonly used Talon captures and lists with their available spoken forms. 
-                    Use these in your voice commands like "snap left" or "go word hello".
+                    Use these in your voice commands like "snap left" or "system tray".
                 </p>
                 <div class="capture-legend" style="display: flex; gap: 16px; margin: 8px 0; font-size: 11px;">
                     <span style="display: flex; align-items: center; gap: 4px;">
