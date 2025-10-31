@@ -9,3 +9,4 @@ node_modules/**
 
 test-data/user/**
 test-db/talon-commands.json
+publish-secret.txt
