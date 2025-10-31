@@ -2,12 +2,12 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { TalonVoiceCommand, TalonListItem, SearchScope } from './types';
-import { SqliteManager } from './database/sqliteManager';
+import { DataManager } from './database/dataManager';
 import { TalonFileParser } from './parser/talonFileParser';
 import { TalonListParser } from './parser/talonListParser';
 
 let searchPanel: vscode.WebviewPanel | undefined;
-let db: SqliteManager;
+let db: DataManager;
 const parser = new TalonFileParser();
 const listParser = new TalonListParser();
 
@@ -17,7 +17,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // Initialize JSON database
     try {
         const storagePath = context.globalStorageUri.fsPath;
-        db = new SqliteManager(storagePath);
+        db = new DataManager(storagePath);
         db.initialize();
         console.log('JSON database initialized at:', storagePath);
     } catch (err) {

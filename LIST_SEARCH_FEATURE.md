@@ -13,7 +13,7 @@ Added comprehensive Talon list search functionality to the VS Code extension, si
 - Handles field length truncation (spoken form: 100 chars, list value: 700 chars)
 
 ### 2. Database Enhancement
-- **File**: `src/database/sqliteManager.ts`
+- **File**: `src/database/dataManager.ts`
 - Added list storage alongside commands
 - Methods for inserting, searching, and managing list items
 - Supports batch operations for performance

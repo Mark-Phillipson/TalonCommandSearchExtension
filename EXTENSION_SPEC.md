@@ -81,7 +81,7 @@ talon-command-search-extension/
 ├── src/
 │   ├── extension.ts              # Entry point, command registration
 │   ├── database/
-│   │   ├── sqliteManager.ts      # SQLite connection & schema
+│   │   ├── dataManager.ts        # JSON-based data storage & search
 │   │   ├── commandRepository.ts  # CRUD for TalonVoiceCommand
 │   │   └── listRepository.ts     # CRUD for TalonList
 │   ├── parser/

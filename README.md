@@ -112,7 +112,7 @@ npm run watch
 ## 🏛️ Technical Architecture
 
 - **🎯 Extension Host** (`src/extension.ts`): VS Code integration, command registration, file scanning
-- **💾 Database Manager** (`src/database/sqliteManager.ts`): JSON storage, in-memory search, repository breakdown
+- **💾 Database Manager** (`src/database/dataManager.ts`): JSON storage, in-memory search, repository breakdown
 - **📝 Parser** (`src/parser/talonFileParser.ts`): Advanced Talon file parsing (headers, commands, scripts)
 - **🖥️ Webview UI** (`webview/`): Modern search interface with real-time filtering and stats
 - **📊 Data Models** (`src/types.ts`): TypeScript interfaces ensuring type safety

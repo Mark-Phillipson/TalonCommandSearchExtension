@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { TalonVoiceCommand, TalonListItem } from '../types';
 
-export class SqliteManager {
+export class DataManager {
     private commands: TalonVoiceCommand[] = [];
     private lists: TalonListItem[] = [];
     private dbPath: string;
@@ -113,12 +113,12 @@ export class SqliteManager {
         repository?: string,
         maxResults: number = 500
     ): TalonVoiceCommand[] {
-        console.log(`[SqliteManager] Search called with: term="${searchTerm}", scope=${searchScope}, app="${application}", mode="${mode}", repo="${repository}"`);
-        console.log(`[SqliteManager] Database has ${this.commands.length} commands and ${this.lists.length} list items`);
+        console.log(`[DataManager] Search called with: term="${searchTerm}", scope=${searchScope}, app="${application}", mode="${mode}", repo="${repository}"`);
+        console.log(`[DataManager] Database has ${this.commands.length} commands and ${this.lists.length} list items`);
         
         // Debug: Check for commands with list placeholders
         const commandsWithLists = this.commands.filter(cmd => cmd.command.includes('{'));
-        console.log(`[SqliteManager] Found ${commandsWithLists.length} commands with list placeholders:`, 
+        console.log(`[DataManager] Found ${commandsWithLists.length} commands with list placeholders:`, 
             commandsWithLists.slice(0, 10).map(cmd => cmd.command)
         );
         
@@ -138,43 +138,43 @@ export class SqliteManager {
         // Apply search term
         if (searchTerm && searchTerm.trim().length > 0) {
             const term = searchTerm.trim().toLowerCase();
-            console.log(`[SqliteManager] Searching for term: "${term}"`);
+            console.log(`[DataManager] Searching for term: "${term}"`);
             
             if (searchScope === 0) {
                 // CommandNamesOnly
-                console.log(`[SqliteManager] Using CommandNamesOnly search scope`);
+                console.log(`[DataManager] Using CommandNamesOnly search scope`);
                 const beforeCount = results.length;
                 results = results.filter(cmd => 
                     cmd.command.toLowerCase().includes(term) ||
                     this.commandMatchesListItem(cmd.command, term)
                 );
-                console.log(`[SqliteManager] CommandNamesOnly: Filtered from ${beforeCount} to ${results.length} results`);
+                console.log(`[DataManager] CommandNamesOnly: Filtered from ${beforeCount} to ${results.length} results`);
                 
                 // Log first few results for debugging
                 if (results.length > 0) {
-                    console.log(`[SqliteManager] First few CommandNamesOnly results:`, 
+                    console.log(`[DataManager] First few CommandNamesOnly results:`, 
                         results.slice(0, 3).map(cmd => ({ command: cmd.command, script: cmd.script.substring(0, 50) + '...' }))
                     );
                 }
             } else if (searchScope === 1) {
                 // ScriptOnly
-                console.log(`[SqliteManager] Using ScriptOnly search scope`);
+                console.log(`[DataManager] Using ScriptOnly search scope`);
                 results = results.filter(cmd => 
                     cmd.script.toLowerCase().includes(term)
                 );
             } else {
                 // All - search in command, script, application, and list items
-                console.log(`[SqliteManager] Using All search scope`);
-                console.log(`[SqliteManager] Sample commands to search through:`, 
+                console.log(`[DataManager] Using All search scope`);
+                console.log(`[DataManager] Sample commands to search through:`, 
                     results.slice(0, 5).map(cmd => ({ command: cmd.command, app: cmd.application }))
                 );
                 
                 // Test our list matching on a few commands with list placeholders
                 const testCommands = results.filter(cmd => cmd.command.includes('{')).slice(0, 3);
-                console.log(`[SqliteManager] Testing list matching on sample commands:`, testCommands.map(cmd => cmd.command));
+                console.log(`[DataManager] Testing list matching on sample commands:`, testCommands.map(cmd => cmd.command));
                 testCommands.forEach(cmd => {
                     const matches = this.commandMatchesListItem(cmd.command, term);
-                    console.log(`[SqliteManager] Command "${cmd.command}" matches search "${term}": ${matches}`);
+                    console.log(`[DataManager] Command "${cmd.command}" matches search "${term}": ${matches}`);
                 });
                 
                 results = results.filter(cmd => 
@@ -188,7 +188,7 @@ export class SqliteManager {
             }
         }
 
-        console.log(`[SqliteManager] Final result count: ${results.length}`);
+        console.log(`[DataManager] Final result count: ${results.length}`);
         return results.slice(0, maxResults);
     }
 
@@ -277,14 +277,14 @@ export class SqliteManager {
         searchTerm: string,
         maxResults: number = 500
     ): TalonListItem[] {
-        console.log(`[SqliteManager] List search called with: term="${searchTerm}"`);
+        console.log(`[DataManager] List search called with: term="${searchTerm}"`);
         
         let results = [...this.lists];
 
         // Apply search term
         if (searchTerm && searchTerm.trim().length > 0) {
             const term = searchTerm.trim().toLowerCase();
-            console.log(`[SqliteManager] Searching lists for term: "${term}"`);
+            console.log(`[DataManager] Searching lists for term: "${term}"`);
             
             results = results.filter(item => 
                 item.listName.toLowerCase().includes(term) ||
@@ -294,7 +294,7 @@ export class SqliteManager {
             );
         }
 
-        console.log(`[SqliteManager] Final list result count: ${results.length}`);
+        console.log(`[DataManager] Final list result count: ${results.length}`);
         return results.slice(0, maxResults);
     }
 
@@ -419,7 +419,7 @@ export class SqliteManager {
                         listValue.includes(word) ||
                         // Handle multi-word spoken forms (e.g., "hello world" matches "hello world")
                         (spokenForm.includes(' ') && searchTerm === spokenForm)) {
-                        console.log(`[SqliteManager] Found list match: "${word}" (from "${searchTerm}") matches list item "${item.spokenForm}" -> "${item.listValue}" in list "${listName}"`);
+                        console.log(`[DataManager] Found list match: "${word}" (from "${searchTerm}") matches list item "${item.spokenForm}" -> "${item.listValue}" in list "${listName}"`);
                         return true;
                     }
                 }
