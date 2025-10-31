@@ -212,6 +212,8 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             application: message.application,
                             mode: message.mode,
                             repository: message.repository,
+                            tags: message.tags,
+                            operatingSystem: message.operatingSystem,
                             maxResults: message.maxResults
                         });
                         
@@ -226,6 +228,8 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             message.application,
                             message.mode,
                             message.repository,
+                            message.tags,
+                            message.operatingSystem,
                             message.maxResults || 500
                         );
                         console.log('[Search] Found', results.length, 'results');
@@ -640,6 +644,12 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
                 </select>
                 <select id="filterRepository">
                     <option value="">All Repositories</option>
+                </select>
+                <select id="filterTags">
+                    <option value="">All Tags</option>
+                </select>
+                <select id="filterOperatingSystem">
+                    <option value="">All Operating Systems</option>
                 </select>
             </div>
 

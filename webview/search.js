@@ -6,7 +6,8 @@
         applications: [],
         modes: [],
         repositories: [],
-        operatingSystems: []
+        operatingSystems: [],
+        tags: []
     };
     let totalCommands = 0;
     let totalLists = 0;
@@ -43,6 +44,8 @@
         const application = document.getElementById('filterApplication')?.value || undefined;
         const mode = document.getElementById('filterMode')?.value || undefined;
         const repository = document.getElementById('filterRepository')?.value || undefined;
+        const tags = document.getElementById('filterTags')?.value || undefined;
+        const operatingSystem = document.getElementById('filterOperatingSystem')?.value || undefined;
         
         // Create search parameters object
         const searchParams = {
@@ -51,6 +54,8 @@
             application: application === '' ? undefined : application,
             mode: mode === '' ? undefined : mode,
             repository: repository === '' ? undefined : repository,
+            tags: tags === '' ? undefined : tags,
+            operatingSystem: operatingSystem === '' ? undefined : operatingSystem,
             maxResults: 500
         };
         
@@ -482,6 +487,36 @@
                 repoFilter.appendChild(option);
             });
         }
+        
+        const tagsFilter = document.getElementById('filterTags');
+        if (tagsFilter) {
+            tagsFilter.innerHTML = '<option value="">All Tags</option>';
+            // Sort tags alphabetically
+            const sortedTags = [...filters.tags].sort((a, b) => 
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+            sortedTags.forEach(tag => {
+                const option = document.createElement('option');
+                option.value = tag;
+                option.textContent = tag;
+                tagsFilter.appendChild(option);
+            });
+        }
+        
+        const osFilter = document.getElementById('filterOperatingSystem');
+        if (osFilter) {
+            osFilter.innerHTML = '<option value="">All Operating Systems</option>';
+            // Sort operating systems alphabetically
+            const sortedOS = [...filters.operatingSystems].sort((a, b) => 
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+            sortedOS.forEach(os => {
+                const option = document.createElement('option');
+                option.value = os;
+                option.textContent = os;
+                osFilter.appendChild(option);
+            });
+        }
     }
 
     function filterByRepository(repository) {
@@ -617,6 +652,18 @@
                 performSearch();
             });
             console.log('[Init] Repository filter listener attached');
+        }
+        
+        const filterTags = document.getElementById('filterTags');
+        if (filterTags) {
+            filterTags.addEventListener('change', performSearch);
+            console.log('[Init] Tags filter listener attached');
+        }
+        
+        const filterOperatingSystem = document.getElementById('filterOperatingSystem');
+        if (filterOperatingSystem) {
+            filterOperatingSystem.addEventListener('change', performSearch);
+            console.log('[Init] Operating System filter listener attached');
         }
 
         // Toolbar button handlers

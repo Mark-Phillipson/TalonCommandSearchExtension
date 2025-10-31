@@ -112,6 +112,32 @@ h1 {
     min-width: 150px;
 }
 
+/* Specific widths for individual filters */
+#filterApplication {
+    min-width: 130px;
+    flex: 0 0 130px;
+}
+
+#filterMode {
+    min-width: 130px;
+    flex: 0 0 130px;
+}
+
+#filterRepository {
+    min-width: 140px;
+    flex: 0 0 140px;
+}
+
+#filterTags {
+    min-width: 130px;
+    flex: 0 0 130px;
+}
+
+#filterOperatingSystem {
+    min-width: 175px;
+    flex: 0 0 175px;
+}
+
 .stats {
     margin-bottom: 15px;
     color: var(--vscode-descriptionForeground);

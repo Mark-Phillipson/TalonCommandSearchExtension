@@ -111,9 +111,11 @@ export class DataManager {
         application?: string,
         mode?: string,
         repository?: string,
+        tags?: string,
+        operatingSystem?: string,
         maxResults: number = 500
     ): TalonVoiceCommand[] {
-        console.log(`[DataManager] Search called with: term="${searchTerm}", scope=${searchScope}, app="${application}", mode="${mode}", repo="${repository}"`);
+        console.log(`[DataManager] Search called with: term="${searchTerm}", scope=${searchScope}, app="${application}", mode="${mode}", repo="${repository}", tags="${tags}", os="${operatingSystem}"`);
         console.log(`[DataManager] Database has ${this.commands.length} commands and ${this.lists.length} list items`);
         
         // Debug: Check for commands with list placeholders
@@ -133,6 +135,17 @@ export class DataManager {
         }
         if (repository) {
             results = results.filter(cmd => cmd.repository === repository);
+        }
+        if (tags) {
+            results = results.filter(cmd => {
+                if (!cmd.tags) return false;
+                // Check if the selected tag appears in the command's comma-separated tags
+                const commandTags = cmd.tags.split(',').map(tag => tag.trim());
+                return commandTags.includes(tags);
+            });
+        }
+        if (operatingSystem) {
+            results = results.filter(cmd => cmd.operatingSystem === operatingSystem);
         }
 
         // Apply search term
@@ -201,17 +214,27 @@ export class DataManager {
         modes: string[];
         repositories: string[];
         operatingSystems: string[];
+        tags: string[];
     } {
         const applications = [...new Set(this.commands.map(cmd => cmd.application).filter(Boolean) as string[])].sort();
         const modes = [...new Set(this.commands.map(cmd => cmd.mode).filter(Boolean) as string[])].sort();
         const repositories = [...new Set(this.commands.map(cmd => cmd.repository).filter(Boolean) as string[])].sort();
         const operatingSystems = [...new Set(this.commands.map(cmd => cmd.operatingSystem).filter(Boolean) as string[])].sort();
+        
+        // Extract individual tags from comma-separated tag strings
+        const allTags = this.commands
+            .map(cmd => cmd.tags)
+            .filter(Boolean)
+            .flatMap(tagString => tagString!.split(',').map(tag => tag.trim()))
+            .filter(tag => tag.length > 0);
+        const tags = [...new Set(allTags)].sort();
 
         return {
             applications,
             modes,
             repositories,
-            operatingSystems
+            operatingSystems,
+            tags
         };
     }
 
