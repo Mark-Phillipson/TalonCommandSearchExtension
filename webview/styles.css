@@ -1,6 +1,15 @@
+:root {
+    --tcs-surface: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+    --tcs-surface-alt: var(--vscode-sideBarSectionHeader-background, var(--tcs-surface));
+    --tcs-surface-muted: var(--vscode-list-inactiveSelectionBackground, rgba(128, 128, 128, 0.2));
+    --tcs-border-strong: var(--vscode-contrastBorder, var(--vscode-panel-border));
+    --tcs-text-strong: var(--vscode-foreground);
+    --tcs-text-subtle: var(--vscode-descriptionForeground);
+}
+
 body {
     font-family: var(--vscode-font-family);
-    color: var(--vscode-foreground);
+    color: var(--tcs-text-strong);
     background-color: var(--vscode-editor-background);
     padding: 20px;
     margin: 0;
@@ -140,7 +149,7 @@ h1 {
 
 .stats {
     margin-bottom: 15px;
-    color: var(--vscode-descriptionForeground);
+    color: var(--tcs-text-subtle);
     font-size: 13px;
 }
 
@@ -195,7 +204,7 @@ h1 {
     display: inline-flex;
     align-items: center;
     padding: 2px 6px;
-    background: var(--vscode-list-inactiveSelectionBackground);
+    background: var(--tcs-surface-muted);
     border-radius: 3px;
     font-size: 11px;
     white-space: nowrap;
@@ -234,7 +243,7 @@ h1 {
     padding: 8px 12px;
     background: var(--vscode-textBlockQuote-background);
     border-left: 3px solid var(--vscode-textLink-foreground);
-    color: var(--vscode-foreground);
+    color: var(--tcs-text-strong);
     font-size: 13px;
     font-weight: 600;
 }
@@ -277,8 +286,8 @@ h1 {
 }
 
 .command-card {
-    background: var(--vscode-editor-background);
-    border: 1px solid var(--vscode-panel-border);
+    background: var(--tcs-surface);
+    border: 1px solid var(--tcs-border-strong);
     border-radius: 6px;
     padding: 12px;
     cursor: pointer;
@@ -299,8 +308,9 @@ h1 {
 }
 
 .command-header strong {
-    color: var(--vscode-textLink-foreground);
+    color: var(--tcs-text-strong);
     font-size: 14px;
+    font-weight: 600;
 }
 
 .app-badge {
@@ -312,7 +322,7 @@ h1 {
 }
 
 .command-script {
-    background: var(--vscode-textCodeBlock-background);
+    background: var(--tcs-surface-alt);
     padding: 8px;
     border-radius: 4px;
     font-family: var(--vscode-editor-font-family);
@@ -321,13 +331,14 @@ h1 {
     margin: 8px 0;
     overflow-x: auto;
     white-space: pre-wrap;
+    color: var(--tcs-text-strong);
 }
 
 .command-footer {
     display: flex;
     gap: 12px;
     font-size: 12px;
-    color: var(--vscode-descriptionForeground);
+    color: var(--tcs-text-subtle);
     margin-top: 8px;
 }
 
@@ -431,14 +442,14 @@ h1 {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
-    background: var(--vscode-editor-background);
-    border: 1px solid var(--vscode-panel-border);
+    background: var(--tcs-surface);
+    border: 1px solid var(--tcs-border-strong);
     border-radius: 6px;
     overflow: hidden;
 }
 
 .list-table thead {
-    background: var(--vscode-editorGroupHeader-tabsBackground);
+    background: var(--tcs-surface-alt);
 }
 
 .list-table th {
@@ -554,32 +565,35 @@ h1 {
 /* Compact list item display */
 .list-items-container {
     margin-bottom: 20px;
-    background: var(--vscode-editor-background);
-    border: 1px solid var(--vscode-panel-border);
+    background: var(--tcs-surface);
+    border: 1px solid var(--tcs-border-strong);
     border-radius: 6px;
     padding: 8px;
 }
 
 .list-item-compact {
-    padding: 4px 8px;
+    padding: 6px 8px;
     margin: 2px 0;
-    border-radius: 3px;
+    border-radius: 4px;
     font-size: 13px;
     line-height: 1.4;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    border: 1px solid transparent;
+    background: var(--tcs-surface);
 }
 
 .list-item-compact:hover {
     background: var(--vscode-list-hoverBackground);
+    border-color: var(--vscode-focusBorder);
 }
 
 .spoken-form-compact {
     font-family: var(--vscode-editor-font-family);
-    color: var(--vscode-textLink-foreground);
-    font-weight: 500;
+    color: var(--tcs-text-strong);
+    font-weight: 600;
     margin-right: 4px;
 }
 
@@ -590,7 +604,7 @@ h1 {
 
 .list-value-compact {
     font-family: var(--vscode-editor-font-family);
-    color: var(--vscode-foreground);
+    color: var(--tcs-text-strong);
     margin-right: 8px;
     word-break: break-all;
     flex: 1;
@@ -598,7 +612,7 @@ h1 {
 }
 
 .source-compact {
-    color: var(--vscode-descriptionForeground);
+    color: var(--tcs-text-subtle);
     font-size: 11px;
     margin-left: auto;
     flex-shrink: 0;
@@ -660,8 +674,8 @@ h1 {
 /* Captures tab specific styles */
 .capture-group {
     margin-bottom: 20px;
-    background: var(--vscode-editor-background);
-    border: 1px solid var(--vscode-panel-border);
+    background: var(--tcs-surface);
+    border: 1px solid var(--tcs-border-strong);
     border-radius: 6px;
     overflow: hidden;
 }
@@ -671,8 +685,8 @@ h1 {
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
-    background: var(--vscode-editorGroupHeader-tabsBackground);
-    border-bottom: 1px solid var(--vscode-panel-border);
+    background: var(--tcs-surface-alt);
+    border-bottom: 1px solid var(--tcs-border-strong);
     cursor: pointer;
     -webkit-user-select: none;
     user-select: none;
@@ -702,10 +716,10 @@ h1 {
 
 .capture-description {
     padding: 8px 16px;
-    color: var(--vscode-descriptionForeground);
+    color: var(--tcs-text-subtle);
     font-size: 13px;
     background: var(--vscode-textBlockQuote-background);
-    border-bottom: 1px solid var(--vscode-panel-border);
+    border-bottom: 1px solid var(--tcs-border-strong);
     font-style: italic;
 }
 
@@ -726,8 +740,8 @@ h1 {
 }
 
 .capture-example {
-    background: var(--vscode-textCodeBlock-background);
-    border: 1px solid var(--vscode-input-border);
+    background: var(--tcs-surface);
+    border: 1px solid var(--tcs-border-strong);
     border-radius: 4px;
     padding: 8px 12px;
     transition: all 0.2s ease;
@@ -741,14 +755,14 @@ h1 {
 .example-spoken {
     font-family: var(--vscode-editor-font-family);
     font-size: 14px;
-    font-weight: 500;
-    color: var(--vscode-textLink-foreground);
+    font-weight: 600;
+    color: var(--tcs-text-strong);
     margin-bottom: 4px;
 }
 
 .example-description {
     font-size: 12px;
-    color: var(--vscode-descriptionForeground);
+    color: var(--tcs-text-subtle);
     line-height: 1.3;
 }
 
@@ -802,13 +816,13 @@ h1 {
 
 .capture-type-capture {
     background: var(--vscode-charts-blue, #007acc);
-    color: var(--vscode-editor-background, #ffffff);
+    color: var(--vscode-editor-foreground, var(--vscode-foreground));
     border: 1px solid var(--vscode-charts-blue, #007acc);
 }
 
 .capture-type-list {
     background: var(--vscode-charts-green, #388a34);
-    color: var(--vscode-editor-background, #ffffff);
+    color: var(--vscode-editor-foreground, var(--vscode-foreground));
     border: 1px solid var(--vscode-charts-green, #388a34);
 }
 
