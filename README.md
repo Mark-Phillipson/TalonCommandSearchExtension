@@ -6,6 +6,8 @@
 >
 > **🔒 File Access Policy**: This extension only **reads** your Talon files (.talon, .talon-list, .py). It never writes to, modifies, or deletes any of your Talon Voice files or Python scripts. All file access is read-only for indexing and search purposes only.
 
+![Talon Command Search Screenshot](images/screenshot.png)
+
 ## ✨ Features
 
 - **⚡ Lightning Fast JSON Storage**: Handles massive datasets (27k+ commands) with optimized in-memory search
