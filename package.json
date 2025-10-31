@@ -7,6 +7,10 @@
     "email": "MPhillipson0@Gmail.com"
   },
   "description": "Search and browse 10k+ Talon Voice commands and lists with advanced filtering. Kind of like what can I say but better!",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mark-Phillipson/TalonCommandSearchExtension"
+  },
   "version": "0.0.2",
   "icon": "talon_command_search.png",
   "engines": {
@@ -16,6 +20,16 @@
     "Programming Languages",
     "Snippets",
     "Other"
+  ],
+  "keywords": [
+    "talon",
+    "talon voice",
+    "voice coding",
+    "speech recognition",
+    "command search",
+    "voice commands",
+    "accessibility",
+    "productivity"
   ],
   "main": "./out/extension.js",
   "scripts": {
