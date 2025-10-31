@@ -114,9 +114,11 @@ export class DataManager {
         tags?: string,
         operatingSystem?: string,
         title?: string,
-        maxResults: number = 500
+        maxResults: number = 500,
+        preferredApplications?: string[],
+        excludedOperatingSystems?: string[]
     ): TalonVoiceCommand[] {
-        console.log(`[DataManager] Search called with: term="${searchTerm}", scope=${searchScope}, app="${application}", mode="${mode}", repo="${repository}", tags="${tags}", os="${operatingSystem}", title="${title}"`);
+        console.log(`[DataManager] Search called with: term="${searchTerm}", scope=${searchScope}, app="${application}", mode="${mode}", repo="${repository}", tags="${tags}", os="${operatingSystem}", title="${title}", preferredApps=${preferredApplications ? preferredApplications.join(',') : '[]'}, excludedOS=${excludedOperatingSystems ? excludedOperatingSystems.join(',') : '[]'}`);
         console.log(`[DataManager] Database has ${this.commands.length} commands and ${this.lists.length} list items`);
         
         // Debug: Check for commands with list placeholders
@@ -150,6 +152,30 @@ export class DataManager {
         }
         if (title) {
             results = results.filter(cmd => cmd.title === title);
+        }
+
+        const hasPreferredApps = !application && Array.isArray(preferredApplications) && preferredApplications.length > 0;
+        const hasExcludedOperatingSystems = !operatingSystem && Array.isArray(excludedOperatingSystems) && excludedOperatingSystems.length > 0;
+
+        if (hasPreferredApps) {
+            const preferredAppSet = new Set(preferredApplications.map(app => app.toLowerCase()));
+            results = results.filter(cmd => {
+                const commandApp = (cmd.application || 'global').toLowerCase();
+                if (commandApp === 'global') {
+                    return true;
+                }
+                return preferredAppSet.has(commandApp);
+            });
+        }
+
+        if (hasExcludedOperatingSystems) {
+            const excludedOsSet = new Set(excludedOperatingSystems.map(os => os.toLowerCase()));
+            results = results.filter(cmd => {
+                if (!cmd.operatingSystem) {
+                    return true;
+                }
+                return !excludedOsSet.has(cmd.operatingSystem.toLowerCase());
+            });
         }
 
         // Apply search term

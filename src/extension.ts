@@ -214,7 +214,9 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             repository: message.repository,
                             tags: message.tags,
                             operatingSystem: message.operatingSystem,
-                            maxResults: message.maxResults
+                            maxResults: message.maxResults,
+                            preferredApplications: message.preferredApplications,
+                            excludedOperatingSystems: message.excludedOperatingSystems
                         });
                         
                         // Ensure searchScope is a number - be careful with 0 being falsy
@@ -231,7 +233,9 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             message.tags,
                             message.operatingSystem,
                             message.title,
-                            message.maxResults || 500
+                            message.maxResults || 500,
+                            message.preferredApplications,
+                            message.excludedOperatingSystems
                         );
                         console.log('[Search] Found', results.length, 'results');
                         searchPanel?.webview.postMessage({
@@ -296,11 +300,15 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                     case 'getConfig':
                         const config = vscode.workspace.getConfiguration('talonSearch');
                         const searchDebounceMs = config.get<number>('searchDebounceMs', 3000);
+                        const defaultApplications = config.get<string[]>('defaultApplications') || [];
+                        const excludedOperatingSystems = config.get<string[]>('excludedOperatingSystems') || [];
                         console.log('[Config] Sending config to webview:', { searchDebounceMs });
                         searchPanel?.webview.postMessage({
                             command: 'config',
                             config: {
-                                searchDebounceMs: searchDebounceMs
+                                searchDebounceMs: searchDebounceMs,
+                                defaultApplications,
+                                excludedOperatingSystems
                             }
                         });
                         break;
@@ -383,10 +391,14 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
         // Send initial configuration
         const config = vscode.workspace.getConfiguration('talonSearch');
         const searchDebounceMs = config.get<number>('searchDebounceMs', 3000);
+        const defaultApplications = config.get<string[]>('defaultApplications') || [];
+        const excludedOperatingSystems = config.get<string[]>('excludedOperatingSystems') || [];
         searchPanel.webview.postMessage({
             command: 'config',
             config: {
-                searchDebounceMs: searchDebounceMs
+                searchDebounceMs: searchDebounceMs,
+                defaultApplications,
+                excludedOperatingSystems
             }
         });
     } else {

@@ -18,6 +18,8 @@
     let lastSearchParams = null;
     let searchDebounceMs = 3000; // Default 3 seconds, will be updated from extension config
     let capturesData = []; // Will be populated with common Talon captures and lists
+    let preferredApplications = [];
+    let excludedOperatingSystems = [];
 
     // Initialize captures data with common Talon captures and lists
     function initializeCapturesData() {
@@ -330,7 +332,9 @@
             tags: tags === '' ? undefined : tags,
             title: title === '' ? undefined : title,
             operatingSystem: operatingSystem === '' ? undefined : operatingSystem,
-            maxResults: 500
+            maxResults: 500,
+            preferredApplications: preferredApplications.length > 0 ? preferredApplications : undefined,
+            excludedOperatingSystems: excludedOperatingSystems.length > 0 ? excludedOperatingSystems : undefined
         };
 
         // Check if this is the same search as the last one
@@ -1307,6 +1311,10 @@
                     searchDebounceMs = message.config.searchDebounceMs;
                     console.log('[Webview] Search debounce set to:', searchDebounceMs, 'ms');
                 }
+                preferredApplications = Array.isArray(message.config.defaultApplications) ? message.config.defaultApplications.filter(Boolean) : [];
+                excludedOperatingSystems = Array.isArray(message.config.excludedOperatingSystems) ? message.config.excludedOperatingSystems.filter(Boolean) : [];
+                lastSearchParams = null; // force refresh with new defaults
+                performSearch();
                 break;
 
             case 'error':

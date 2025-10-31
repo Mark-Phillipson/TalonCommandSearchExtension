@@ -38,6 +38,8 @@ export interface SearchOptions {
   codeLanguage?: string;
   searchScope: SearchScope;
   maxResults?: number;          // default 500
+  preferredApplications?: string[];
+  excludedOperatingSystems?: string[];
 }
 
 export enum SearchScope {

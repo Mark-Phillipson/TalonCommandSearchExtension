@@ -67,6 +67,22 @@
           "minimum": 0,
           "maximum": 30000,
           "description": "Delay in milliseconds before performing search after typing (0-30000ms, default: 3000ms)"
+        },
+        "talonSearch.defaultApplications": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Application names to include by default when opening the search view. Leave empty to include every application."
+        },
+        "talonSearch.excludedOperatingSystems": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Operating system names to hide from search results when the search view opens. Commands scoped to these operating systems will be excluded unless you manually select an operating system filter."
         }
       }
     },
