@@ -31,7 +31,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // Store all command registrations in disposables array
     disposables.push(
         vscode.commands.registerCommand('talon.searchCommands', async () => {
-            await showSearchPanel(context, SearchScope.All);
+            await showSearchPanel(context, SearchScope.SpokenForms); // Use enum for Spoken Forms
         })
     );
 
@@ -581,7 +581,6 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
     <title>Talon Command Search</title>
 </head>
 <body>
-    <div>01-11-2025 14:57</div>
     <div class="container">
         <h1>Talon Command Search</h1>
         

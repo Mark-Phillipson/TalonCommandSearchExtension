@@ -1050,7 +1050,7 @@
         console.log('[Init] Initializing webview...');
 
         // Initialize captures and lists data
-        initializeCapturesData();
+            initializeCapturesData(); // Initialize captures data with common Talon captures and lists
         console.log('[Init] Captures & Lists data initialized with', capturesData.length, 'categories');
 
         // Add new search scope option for Spoken Forms

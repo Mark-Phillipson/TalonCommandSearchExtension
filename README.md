@@ -281,14 +281,20 @@ npm run watch
 - [ ] **🔗 Cross-Reference Search** - Show which commands use specific lists
 - [ ] **✏️ Inline List Editing** - Edit list items directly in the interface
 
+
 ## 🎉 What's New in This Version
+
+- **🗣️ New Default Search Scope: Spoken Forms (Commands + Lists)**
+  - The search panel now defaults to the "Spoken Forms (Commands + Lists)" filter, making it easier to find both command names and list values instantly.
+  - This scope includes intelligent matching for spoken phrases and list values, so searching for terms like "left" or "happy" will find commands that use those list items.
+  - You can still switch to other scopes (All, Command Names Only, Scripts Only) using the dropdown next to the search box.
 
 - **🎯 Enhanced User Experience**: Smart focus management with automatic search input focus when switching tabs
 - **⏱️ Configurable Search Debounce**: Customizable search delay (0-30s) with visual feedback and performance optimization  
 - **🔍 Advanced Filtering System**: New tags and operating system filters with enhanced repository breakdown
 - **📑 Revolutionary List Search**: Complete tabbed interface with dedicated Talon list search functionality
 - **🎯 Intelligent List Parsing**: Full support for .talon-list files with comprehensive search capabilities
-- **🎪 Organized Results**: Grouped list results by list name with clean table formatting
+- **� Organized Results**: Grouped list results by list name with clean table formatting
 - **🔍 Enhanced Filtering**: Click-to-filter list names with collapsible interface design
 - **🚀 Performance Revolution**: Migrated from SQLite to optimized JSON storage
 - **📊 Repository Insights**: See exactly where your commands come from with clickable stats
@@ -298,7 +304,7 @@ npm run watch
 - **⚡ Zero Dependencies**: No more native module compilation issues
 - **🔧 Windows Compatible**: Solved all the pesky Node.js version conflicts
 - **📈 Scalable**: Tested with 27,000+ commands and thousands of list items!
-- **🗣️ Voice-Optimized**: UI designed specifically for voice users with minimal scrolling required
+- **� Voice-Optimized**: UI designed specifically for voice users with minimal scrolling required
 - **📦 Publishing Ready**: Complete marketplace publishing guide included
 
 ## � Publishing & Distribution

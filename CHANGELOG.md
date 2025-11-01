@@ -2,6 +2,12 @@
 
 All notable changes to the Search Talon Commands extension will be documented in this file in reverse chronological order.
 
+
+## [0.0.3] - 2025-11-01
+### Changed
+- The default search scope is now "Spoken Forms (Commands + Lists)", making it easier to find both command names and list values immediately when the search panel opens.
+- Backend and UI updated to support the new search scope, including enum and initialization logic.
+
 ## [0.0.2] - 2024-10-30
 ### Added
 - Dedicated lists tab with grouped Talon list search results and click-to-filter navigation

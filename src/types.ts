@@ -45,7 +45,8 @@ export interface SearchOptions {
 export enum SearchScope {
   CommandNamesOnly = 0,  // Exact equality, case-insensitive
   ScriptOnly = 1,        // Search only in script content
-  All = 2                // Search command, script, title, tags + list matching
+  All = 2,               // Search command, script, title, tags + list matching
+  SpokenForms = 3        // Search spoken forms (commands + lists)
 }
 
 export interface FilterValues {
