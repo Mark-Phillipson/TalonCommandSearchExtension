@@ -6,6 +6,7 @@ This guide walks you through the complete process of publishing the VS Code exte
 code --extensionsDevelopmentPath=. --new-window
 ```
 
+
 ## 🎯 Prerequisites
 
 1. **Visual Studio Code** installed

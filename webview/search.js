@@ -1053,6 +1053,17 @@
         initializeCapturesData();
         console.log('[Init] Captures & Lists data initialized with', capturesData.length, 'categories');
 
+        // Add new search scope option for Spoken Forms
+        const scopeSelect = document.getElementById('searchScope');
+        if (scopeSelect) {
+            scopeSelect.innerHTML = '';
+            scopeSelect.appendChild(new Option('Spoken Forms (Commands + Lists)', '3'));
+            scopeSelect.appendChild(new Option('All (Commands + Scripts + Lists)', '2'));
+            scopeSelect.appendChild(new Option('Command Names Only', '0'));
+            scopeSelect.appendChild(new Option('Scripts Only', '1'));
+            scopeSelect.value = '3'; // Set Spoken Forms as default
+        }
+
         // Setup event listeners
         setupEventListeners();
 

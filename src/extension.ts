@@ -581,6 +581,7 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
     <title>Talon Command Search</title>
 </head>
 <body>
+    <div>01-11-2025 14:57</div>
     <div class="container">
         <h1>Talon Command Search</h1>
         
@@ -600,6 +601,7 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Search commands, scripts, or applications..." />
                 <select id="searchScope">
+                    <option value="3" selected>Spoken Forms (Commands + Lists)</option>
                     <option value="2">All (Commands + Scripts + Lists)</option>
                     <option value="0">Command Names Only</option>
                     <option value="1">Scripts Only</option>

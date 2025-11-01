@@ -118,17 +118,7 @@ export class DataManager {
         preferredApplications?: string[],
         excludedOperatingSystems?: string[]
     ): TalonVoiceCommand[] {
-        console.log(`[DataManager] Search called with: term="${searchTerm}", scope=${searchScope}, app="${application}", mode="${mode}", repo="${repository}", tags="${tags}", os="${operatingSystem}", title="${title}", preferredApps=${preferredApplications ? preferredApplications.join(',') : '[]'}, excludedOS=${excludedOperatingSystems ? excludedOperatingSystems.join(',') : '[]'}`);
-        console.log(`[DataManager] Database has ${this.commands.length} commands and ${this.lists.length} list items`);
-        
-        // Debug: Check for commands with list placeholders
-        const commandsWithLists = this.commands.filter(cmd => cmd.command.includes('{'));
-        console.log(`[DataManager] Found ${commandsWithLists.length} commands with list placeholders:`, 
-            commandsWithLists.slice(0, 10).map(cmd => cmd.command)
-        );
-        
         let results = [...this.commands];
-
         // Apply filters
         if (application) {
             results = results.filter(cmd => cmd.application === application);
@@ -142,7 +132,6 @@ export class DataManager {
         if (tags) {
             results = results.filter(cmd => {
                 if (!cmd.tags) return false;
-                // Check if the selected tag appears in the command's comma-separated tags
                 const commandTags = cmd.tags.split(',').map(tag => tag.trim());
                 return commandTags.includes(tags);
             });
@@ -153,10 +142,8 @@ export class DataManager {
         if (title) {
             results = results.filter(cmd => cmd.title === title);
         }
-
         const hasPreferredApps = !application && Array.isArray(preferredApplications) && preferredApplications.length > 0;
         const hasExcludedOperatingSystems = !operatingSystem && Array.isArray(excludedOperatingSystems) && excludedOperatingSystems.length > 0;
-
         if (hasPreferredApps) {
             const preferredAppSet = new Set(preferredApplications.map(app => app.toLowerCase()));
             results = results.filter(cmd => {
@@ -167,7 +154,6 @@ export class DataManager {
                 return preferredAppSet.has(commandApp);
             });
         }
-
         if (hasExcludedOperatingSystems) {
             const excludedOsSet = new Set(excludedOperatingSystems.map(os => os.toLowerCase()));
             results = results.filter(cmd => {
@@ -177,52 +163,51 @@ export class DataManager {
                 return !excludedOsSet.has(cmd.operatingSystem.toLowerCase());
             });
         }
-
         // Apply search term
         if (searchTerm && searchTerm.trim().length > 0) {
             const term = searchTerm.trim().toLowerCase();
-            console.log(`[DataManager] Searching for term: "${term}"`);
-            
             if (searchScope === 0) {
                 // CommandNamesOnly
                 console.log(`[DataManager] Using CommandNamesOnly search scope`);
                 const beforeCount = results.length;
-                // Only match spoken phrase, not placeholders or script
                 results = results.filter(cmd => {
-                    // Extract spoken phrase up to first <, {, or (
                     const spoken = cmd.command.split(/<|\{|\(/)[0].trim().toLowerCase();
                     return spoken.includes(term);
                 });
                 console.log(`[DataManager] CommandNamesOnly: Filtered from ${beforeCount} to ${results.length} results`);
-                
-                // Log first few results for debugging
                 if (results.length > 0) {
-                    console.log(`[DataManager] First few CommandNamesOnly results:`, 
+                    console.log(`[DataManager] First few CommandNamesOnly results:`,
                         results.slice(0, 3).map(cmd => ({ command: cmd.command, script: cmd.script.substring(0, 50) + '...' }))
                     );
                 }
             } else if (searchScope === 1) {
                 // ScriptOnly
                 console.log(`[DataManager] Using ScriptOnly search scope`);
-                results = results.filter(cmd => 
+                results = results.filter(cmd =>
                     cmd.script.toLowerCase().includes(term)
                 );
+            } else if (searchScope === 3) {
+                // Spoken Forms (Commands + Lists)
+                console.log(`[DataManager] Using Spoken Forms (Commands + Lists) search scope`);
+                const beforeCount = results.length;
+                results = results.filter(cmd => {
+                    const spoken = cmd.command.split(/<|\{|\(/)[0].trim().toLowerCase();
+                    return spoken.includes(term) || this.commandMatchesListItem(cmd.command, term);
+                });
+                console.log(`[DataManager] Spoken Forms: Filtered from ${beforeCount} to ${results.length} results`);
             } else {
-                // All - search in command, script, application, and list items
+                // All
                 console.log(`[DataManager] Using All search scope`);
-                console.log(`[DataManager] Sample commands to search through:`, 
+                console.log(`[DataManager] Sample commands to search through:`,
                     results.slice(0, 5).map(cmd => ({ command: cmd.command, app: cmd.application }))
                 );
-                
-                // Test our list matching on a few commands with list placeholders
                 const testCommands = results.filter(cmd => cmd.command.includes('{')).slice(0, 3);
                 console.log(`[DataManager] Testing list matching on sample commands:`, testCommands.map(cmd => cmd.command));
                 testCommands.forEach(cmd => {
                     const matches = this.commandMatchesListItem(cmd.command, term);
                     console.log(`[DataManager] Command "${cmd.command}" matches search "${term}": ${matches}`);
                 });
-                
-                results = results.filter(cmd => 
+                results = results.filter(cmd =>
                     cmd.command.toLowerCase().includes(term) ||
                     cmd.script.toLowerCase().includes(term) ||
                     (cmd.application && cmd.application.toLowerCase().includes(term)) ||
@@ -232,10 +217,10 @@ export class DataManager {
                 );
             }
         }
-
         console.log(`[DataManager] Final result count: ${results.length}`);
         return results.slice(0, maxResults);
     }
+
 
     public getCommandCount(): number {
         return this.commands.length;
