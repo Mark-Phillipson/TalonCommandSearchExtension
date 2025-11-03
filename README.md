@@ -282,7 +282,10 @@ npm run watch
 - [ ] **✏️ Inline List Editing** - Edit list items directly in the interface
 
 
+
 ## 🎉 What's New in This Version
+
+- **UI Improvement:** The repository breakdown ("Commands by Repository") is now displayed above the search box in the Commands tab. This makes it clear that the figures shown are totals for each repository, not filtered results. When you filter or search, the breakdown remains visible for reference.
 
 - **🗣️ New Default Search Scope: Spoken Forms (Commands + Lists)**
   - The search panel now defaults to the "Spoken Forms (Commands + Lists)" filter, making it easier to find both command names and list values instantly.
@@ -290,22 +293,22 @@ npm run watch
   - You can still switch to other scopes (All, Command Names Only, Scripts Only) using the dropdown next to the search box.
 
 - **🎯 Enhanced User Experience**: Smart focus management with automatic search input focus when switching tabs
-- **⏱️ Configurable Search Debounce**: Customizable search delay (0-30s) with visual feedback and performance optimization  
-- **🔍 Advanced Filtering System**: New tags and operating system filters with enhanced repository breakdown
-- **📑 Revolutionary List Search**: Complete tabbed interface with dedicated Talon list search functionality
-- **🎯 Intelligent List Parsing**: Full support for .talon-list files with comprehensive search capabilities
-- **� Organized Results**: Grouped list results by list name with clean table formatting
-- **🔍 Enhanced Filtering**: Click-to-filter list names with collapsible interface design
-- **🚀 Performance Revolution**: Migrated from SQLite to optimized JSON storage
-- **📊 Repository Insights**: See exactly where your commands come from with clickable stats
-- **🎨 Modern UI**: CSS Grid layout with responsive 3-column design and tabbed navigation
-- **🛠️ Database Tools**: Built-in database management (check/clear with confirmation dialogs)
-- **📁 Flexible Imports**: New commands for setting user folder and importing from any directory
-- **⚡ Zero Dependencies**: No more native module compilation issues
-- **🔧 Windows Compatible**: Solved all the pesky Node.js version conflicts
-- **📈 Scalable**: Tested with 27,000+ commands and thousands of list items!
-- **� Voice-Optimized**: UI designed specifically for voice users with minimal scrolling required
-- **📦 Publishing Ready**: Complete marketplace publishing guide included
+- ⏱️ Configurable Search Debounce: Customizable search delay (0-30s) with visual feedback and performance optimization  
+- 🔍 Advanced Filtering System: New tags and operating system filters with enhanced repository breakdown
+- 📑 Revolutionary List Search: Complete tabbed interface with dedicated Talon list search functionality
+- 🎯 Intelligent List Parsing: Full support for .talon-list files with comprehensive search capabilities
+- 🗂️ Organized Results: Grouped list results by list name with clean table formatting
+- 🔍 Enhanced Filtering: Click-to-filter list names with collapsible interface design
+- 🚀 Performance Revolution: Migrated from SQLite to optimized JSON storage
+- 📊 Repository Insights: See exactly where your commands come from with clickable stats
+- 🎨 Modern UI: CSS Grid layout with responsive 3-column design and tabbed navigation
+- 🛠️ Database Tools: Built-in database management (check/clear with confirmation dialogs)
+- 📁 Flexible Imports: New commands for setting user folder and importing from any directory
+- ⚡ Zero Dependencies: No more native module compilation issues
+- �️ Windows Compatible: Solved all the pesky Node.js version conflicts
+- 📈 Scalable: Tested with 27,000+ commands and thousands of list items!
+- 🗣️ Voice-Optimized: UI designed specifically for voice users with minimal scrolling required
+- 📦 Publishing Ready: Complete marketplace publishing guide included
 
 ## � Publishing & Distribution
 

@@ -29,3 +29,6 @@ All notable changes to the Search Talon Commands extension will be documented in
 - Initial public release with Talon command indexing, lightning-fast search, and repository breakdown stats
 - Commands to refresh the index, import from custom folders, and set the Talon user directory
 - Click-to-open integration for `.talon` and `.talon-list` files from search results
+## [0.0.4] - 2025-11-03
+### Changed
+- UI improvement: The repository breakdown ("Commands by Repository") is now displayed above the search box in the Commands tab, making it clear that the figures are totals and not filtered results.

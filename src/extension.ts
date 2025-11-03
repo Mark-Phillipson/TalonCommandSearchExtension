@@ -597,6 +597,7 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
         </div>
         
         <div id="commandsTab" class="tab-content active">
+            <div id="stats" class="stats"></div>
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Search commands, scripts, or applications..." />
                 <select id="searchScope">
@@ -628,13 +629,11 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
                 </select>
             </div>
 
-            <div id="stats" class="stats"></div>
-            
             <div id="searchSpinner" class="search-spinner">
                 <div class="spinner"></div>
                 <span class="spinner-text">Searching commands...</span>
             </div>
-            
+
             <div id="results" class="results"></div>
         </div>
         
