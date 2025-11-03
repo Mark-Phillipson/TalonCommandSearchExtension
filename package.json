@@ -12,7 +12,7 @@
     "type": "git",
     "url": "https://github.com/Mark-Phillipson/TalonCommandSearchExtension"
   },
-  "version": "0.2.2",
+  "version": "0.2.3",
   "icon": "talon_command_search.png",
   "engines": {
     "vscode": "^1.80.0"
