@@ -335,3 +335,10 @@ We welcome contributions! Here's how to get started:
 ## �📝 License
 
 MIT - Feel free to contribute and make Talon Voice even better! 🎯
+
+## 🧑‍💻 Application Header Normalization (NEW)
+
+- The parser now normalizes any application header containing `terminal` or `windows_terminal` to `windows_terminal` for consistency in filtering and search.
+- Any header containing `powershell` is normalized to `powershell`.
+- If you want `terminal` and `windows_terminal` to be listed separately, you must adjust the normalization logic in `src/parser/talonFileParser.ts`.
+- To ensure commands are indexed under the correct application, add explicit `app: powershell` or `app: terminal` headers to your Talon files.

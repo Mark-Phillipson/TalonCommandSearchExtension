@@ -1,4 +1,5 @@
 os: windows
+app: powershell
 -
 # Windows-specific commands
 open command prompt: key(win-r) "cmd" key(enter)

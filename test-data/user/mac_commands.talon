@@ -1,4 +1,5 @@
 os: mac
+app: terminal
 -
 # macOS-specific commands
 open terminal: key(cmd-space) "terminal" key(enter)

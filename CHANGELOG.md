@@ -3,6 +3,13 @@
 All notable changes to the Search Talon Commands extension will be documented in this file in reverse chronological order.
 
 
+## [0.0.4] - 2025-11-03
+### Changed
+- UI improvement: The repository breakdown ("Commands by Repository") is now displayed above the search box in the Commands tab, making it clear that the figures are totals and not filtered results.
+### Added
+- Application header normalization: `terminal` and `windows_terminal` are now treated as `windows_terminal` for filtering and search consistency.
+- Explicit header requirement: To index commands under `powershell` or `terminal`, Talon files must include `app: powershell` or `app: terminal` headers.
+
 ## [0.0.3] - 2025-11-01
 ### Changed
 - The default search scope is now "Spoken Forms (Commands + Lists)", making it easier to find both command names and list values immediately when the search panel opens.
@@ -29,6 +36,3 @@ All notable changes to the Search Talon Commands extension will be documented in
 - Initial public release with Talon command indexing, lightning-fast search, and repository breakdown stats
 - Commands to refresh the index, import from custom folders, and set the Talon user directory
 - Click-to-open integration for `.talon` and `.talon-list` files from search results
-## [0.0.4] - 2025-11-03
-### Changed
-- UI improvement: The repository breakdown ("Commands by Repository") is now displayed above the search box in the Commands tab, making it clear that the figures are totals and not filtered results.

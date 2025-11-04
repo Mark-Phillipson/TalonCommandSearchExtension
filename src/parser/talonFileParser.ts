@@ -3,11 +3,12 @@ import * as path from 'path';
 
 export class TalonFileParser {
     public parseFile(filePath: string, content: string): Array<Omit<TalonVoiceCommand, 'id'>> {
+            // ...existing code...
         const commands: Array<Omit<TalonVoiceCommand, 'id'>> = [];
         const lines = content.split('\n');
         
-        // Parse headers (before delimiter line)
-        let application = 'global';
+    // Parse headers (before delimiter line)
+    let applications: string[] = [];
         let mode: string | undefined;
         let os: string | undefined;
         let tags: string | undefined;
@@ -33,8 +34,11 @@ export class TalonFileParser {
             
             // Parse headers
             if (inHeader) {
-                if (trimmed.startsWith('app:') || trimmed.startsWith('app.')) {
-                    application = this.parseApplication(trimmed);
+                if (trimmed.startsWith('app:') || trimmed.startsWith('app.') || trimmed.startsWith('app.name:') || trimmed.startsWith('app.exe:')) {
+                    const appVal = this.parseApplication(trimmed);
+                    if (appVal && !applications.includes(appVal)) {
+                        applications.push(appVal);
+                    }
                 } else if (trimmed.startsWith('mode:')) {
                     mode = trimmed.substring(5).trim();
                 } else if (trimmed.startsWith('os:')) {
@@ -65,7 +69,8 @@ export class TalonFileParser {
                     commands.push({
                         command: currentCommand.substring(0, 200),
                         script: currentScript.join('\n').substring(0, 2000),
-                        application: application.substring(0, 200),
+                        application: applications.length > 0 ? applications[0].substring(0, 200) : 'global',
+                        applications: applications.map(a => a.substring(0, 200)),
                         title: title?.substring(0, 200),
                         mode: mode?.substring(0, 300),
                         operatingSystem: os?.substring(0, 100),
@@ -100,7 +105,8 @@ export class TalonFileParser {
             commands.push({
                 command: currentCommand.substring(0, 200),
                 script: currentScript.join('\n').substring(0, 2000),
-                application: application.substring(0, 200),
+                application: applications.length > 0 ? applications[0].substring(0, 200) : 'global',
+                applications: applications.map(a => a.substring(0, 200)),
                 title: title?.substring(0, 200),
                 mode: mode?.substring(0, 300),
                 operatingSystem: os?.substring(0, 100),
@@ -114,19 +120,34 @@ export class TalonFileParser {
             });
         }
         
+        console.log(`[TalonFileParser] Applications detected for file ${filePath}:`, applications);
         return commands;
     }
 
     private parseApplication(line: string): string {
+    const originalLine = line;
         // Handle: app: chrome, app.name: visual studio, app.exe: code.exe
+        let appValue = '';
         if (line.startsWith('app.name:')) {
-            return line.substring(9).trim();
+            appValue = line.substring(9).trim();
         } else if (line.startsWith('app.exe:')) {
-            return line.substring(8).trim().replace('.exe', '');
+            appValue = line.substring(8).trim().replace('.exe', '');
         } else if (line.startsWith('app:')) {
-            return line.substring(4).trim();
+            appValue = line.substring(4).trim();
+        } else {
+            return 'global';
         }
-        return 'global';
+
+        // Normalize PowerShell and Terminal variants
+        const lowerApp = appValue.toLowerCase();
+        let normalized = appValue;
+        if (lowerApp.includes('powershell')) {
+            normalized = 'powershell';
+        } else if (lowerApp.includes('windows_terminal') || lowerApp.includes('terminal')) {
+            normalized = 'windows_terminal';
+        }
+        console.log(`[parseApplication] Header line: '${originalLine}' | Normalized: '${normalized}'`);
+        return normalized;
     }
 
     private extractRepository(filePath: string): string | undefined {

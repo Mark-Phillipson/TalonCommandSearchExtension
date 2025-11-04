@@ -227,6 +227,7 @@ export class DataManager {
     }
 
     public getFilterValues(): {
+        // ...existing code...
         applications: string[];
         modes: string[];
         repositories: string[];
@@ -234,7 +235,14 @@ export class DataManager {
         tags: string[];
         titles: string[];
     } {
-        const applications = [...new Set(this.commands.map(cmd => cmd.application).filter(Boolean) as string[])].sort();
+        const applications = [...new Set(
+            this.commands
+                .flatMap(cmd => cmd.applications ? cmd.applications : [cmd.application])
+                .filter((app): app is string => typeof app === 'string' && app.length > 0)
+        )].sort();
+
+        // Debug log for aggregated applications
+        console.log('[DataManager] Aggregated applications for dropdown:', applications);
         const modes = [...new Set(this.commands.map(cmd => cmd.mode).filter(Boolean) as string[])].sort();
         const repositories = [...new Set(this.commands.map(cmd => cmd.repository).filter(Boolean) as string[])].sort();
         const operatingSystems = [...new Set(this.commands.map(cmd => cmd.operatingSystem).filter(Boolean) as string[])].sort();
@@ -248,7 +256,8 @@ export class DataManager {
             .filter(tag => tag.length > 0);
         const tags = [...new Set(allTags)].sort();
 
-        return {
+    console.log('[DataManager] Aggregated applications for dropdown:', applications);
+    return {
             applications,
             modes,
             repositories,

@@ -5,6 +5,7 @@ export interface TalonVoiceCommand {
   command: string;              // max 200 chars
   script: string;               // max 2000 chars
   application?: string;         // max 200 chars, default "global"
+  applications?: string[];      // multi-app support
   title?: string;               // max 200 chars
   mode?: string;                // max 300 chars (comma-separated)
   operatingSystem?: string;     // max 100 chars

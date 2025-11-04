@@ -1,4 +1,5 @@
 os: linux
+app: terminal
 -
 # Linux-specific commands
 open terminal: key(ctrl-alt-t)

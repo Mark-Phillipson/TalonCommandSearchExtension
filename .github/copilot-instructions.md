@@ -1,64 +1,57 @@
 # 🧑‍💻 Copilot Instructions for Talon Command Search Extension
 
-## Big Picture Architecture
-- **Purpose:** Search, filter, and browse Talon Voice commands and lists (.talon, .talon-list) with advanced UI and instant results.
-- **Core Components:**
-  - `src/extension.ts`: VS Code integration, command registration, file scanning, and webview setup.
-  - `src/database/dataManager.ts`: JSON-based database, in-memory search, repository breakdown, stats.
-  - `src/parser/talonFileParser.ts` & `src/parser/talonListParser.ts`: Parse Talon command and list files.
-  - `webview/`: UI logic (`search.js`) and styles (`styles.css`) for the search interface.
-  - `src/types.ts`: TypeScript interfaces for commands, lists, and search scopes.
+```markdown
+# 🧑‍💻 Copilot instructions — Talon Command Search
 
-## Data Flow & Service Boundaries
-- **Import Workflow:**
-  - User triggers `Talon: Refresh Index` or auto-indexing on startup.
-  - Extension scans user folder for `.talon` and `.talon-list` files (see auto-detection logic in `extension.ts`).
-  - Files are parsed and loaded into the in-memory JSON database.
-  - Search/filter operations are performed in-memory for speed.
-- **Webview Communication:**
-  - Webview sends search/filter/config requests via `postMessage`.
-  - Extension responds with results, stats, config, and file open actions.
+Short, actionable notes to get an AI coding agent productive in this repo.
 
-## Developer Workflows
-- **Build:**
-  - `npm install` to install dependencies.
-  - `npm run compile` to build TypeScript.
-  - `npm run watch` for live development.
-  - Press F5 in VS Code to launch extension dev host.
-- **Database Management:**
-  - Use toolbar buttons in the webview to check/clear the database.
-  - All data is stored in extension global storage, not workspace.
-- **Publishing:**
-  - Follow `PUBLISHING.md` for step-by-step VSCE/Marketplace release.
-  - `.vscodeignore` excludes test/example data from published package.
+1) Big picture (what this extension does)
+  - Purpose: index and search Talon Voice commands (.talon) and lists (.talon-list) locally and present results in a WebView UI.
+  - Design: file scanner → parser(s) → in-memory JSON-backed DB (DataManager) → WebView client. Parsing and search are local; no external services.
 
-## Project-Specific Patterns & Conventions
-- **File Access:** Only reads Talon files; never writes or deletes user data.
-- **Search Debounce:** Configurable delay (default 3000ms) for performance, set via VS Code settings.
-- **Filtering:** Multi-dimensional filters (application, mode, repository, tags, OS, title) with persistent state.
-- **List Matching:** Commands referencing lists (e.g., `<user.arrow_key>`) are mapped to actual list values for search.
-- **UI:** Modern, responsive CSS Grid layout; tabbed interface for commands/lists/captures.
-- **Stats:** Real-time command/list/repository breakdowns sent to webview.
+2) Core files to inspect (use these as touchpoints)
+  - `src/extension.ts` — activation, commands, webview wiring, import flow and auto-detect logic.
+  - `src/database/dataManager.ts` — where search, filters, and repository breakdown live (add filters and change scoring here).
+  - `src/parser/talonFileParser.ts` & `src/parser/talonListParser.ts` — Talon parsing rules; mirror Talon syntax here.
+  - `webview/search.js` & `webview/styles.css` — client-side UI, message handling, and filter controls.
+  - `test-data/` and `test-db/` — sample Talon files and a serialized DB you can use for fast development.
 
-## Integration Points
-- **VS Code API:** Uses commands, configuration, clipboard, file open dialogs, and webview messaging.
-- **No external services:** All search and parsing is local; no remote calls except for publishing.
+3) Exact extension commands and config you can call or automate
+  - Commands (contributed in package.json):
+    - `talon.searchCommands` (Talon: Search Commands)
+    - `talon.refreshIndex` (Talon: Refresh Index)
+    - `talon.openListExplorer` (Talon: Import from Folder)
+    - `talon.setUserFolder` (Talon: Set User Folder Path)
+  - Relevant settings (namespace `talonSearch`): `userFolderPath`, `enableAutoIndexing`, `maxSearchResults`, `searchDebounceMs` (default 3000), `defaultApplications`, `excludedOperatingSystems`.
 
-## Key Files & Examples
-- `src/extension.ts`: Main entry, command registration, webview setup, file import logic.
-- `src/database/dataManager.ts`: Database structure, search/filter logic, stats.
-- `src/parser/talonFileParser.ts`: Command file parsing.
-- `src/parser/talonListParser.ts`: List file parsing.
-- `webview/search.js`: UI logic for search/filter/stats.
-- `webview/styles.css`: Responsive UI design.
-- `.vscodeignore`: Ensures only essential files are published.
-- `PUBLISHING.md`: Marketplace publishing workflow.
+4) Webview message contract (observed in `extension.ts`)
+  - Incoming messages from webview: `search`, `searchLists`, `getStats`, `getConfig`, `openFile`, `copyText`, `triggerRefresh`, `confirmClearDatabase`, `log`, `error`.
+  - Outgoing messages sent to webview: `searchResults`, `listSearchResults`, `stats`, `config`, `importComplete`, `databaseCleared`, `error`, `setSearchScope`.
 
+5) Developer workflows (concrete commands)
+  - Install and build: `npm install` then `npm run compile`.
+  - Live development: `npm run watch` + press F5 in VS Code to launch Extension Dev Host.
+  - Tests: `npm test` (runs the compiled test runner under `out/test` if present).
+
+6) Project conventions and gotchas
+  - Read-only by design: the extension reads Talon files; it never modifies user Talon files — DB lives in extension global storage (DataManager uses the global storage path).
+  - Auto-indexing: enabled when `talonSearch.enableAutoIndexing` is true; `autoDetectTalonPath()` tries common OS-specific locations (APPDATA/~/.talon/user).
+  - Large indexes: imports parse files in batches and call `db.refreshCommandsBatch` / `db.refreshListItemsBatch` to avoid duplicates — be careful when modifying batch APIs.
+  - UI scope values: search scope is an enum used across the codebase — prefer changing/reading the enum in `src/types.ts` for correctness.
+
+7) Where to make common edits
+  - Add a filter: update `dataManager.ts` search logic → add new UI control in `webview/search.js` → ensure `extension.ts` forwards the new field from messages to DataManager.
+  - Change parsing: edit `parser/talonFileParser.ts` or `parser/talonListParser.ts` and use `test-data/` examples to validate.
+
+8) Quick examples
+  - Trigger a full reindex programmatically: execute command `talon.refreshIndex` (or click Refresh Index in the WebView toolbar).
+  - Get runtime config sent to webview: webview sends `getConfig`; extension replies with `config` including `searchDebounceMs`.
+
+9) Troubleshooting hints
+  - If webview shows "Database not initialized", check activation logs and ensure DataManager initialized with a valid global storage path (see `activate()` in `src/extension.ts`).
+  - Parsing failures are logged to console; look for `Failed to parse` messages with the file path.
+
+If anything here is incomplete or you'd like more examples (message payload shapes, enum values, or a short dev checklist), tell me what to expand and I'll iterate.
+
+```
 ## Example: Adding a New Search Filter
-- Update filter logic in `src/database/dataManager.ts`.
-- Add filter UI in `webview/search.js` and `styles.css`.
-- Update message handling in `src/extension.ts` to support new filter.
-
----
-
-**If any section is unclear or missing, please provide feedback so instructions can be improved for future AI agents.**
