@@ -1,3 +1,53 @@
+/* Combined results summary card above results grid */
+.results-summary-card {
+    background: var(--tcs-surface);
+    border: 1px solid var(--tcs-border-strong);
+    border-radius: 8px;
+    padding: 18px 20px 12px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    display: block;
+}
+/* Contextual repository breakdown above search results */
+.contextual-repo-breakdown {
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: var(--vscode-textBlockQuote-background);
+    border-left: 3px solid var(--vscode-textLink-foreground);
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+}
+
+.contextual-repo-breakdown h4 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: var(--vscode-foreground);
+    font-weight: 600;
+}
+
+.repo-breakdown-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    margin-top: 4px;
+}
+
+.repo-breakdown-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    background: var(--tcs-surface-muted);
+    border-radius: 4px;
+    font-size: 12px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.repo-breakdown-item:hover {
+    background: var(--vscode-list-hoverBackground);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
 :root {
     --tcs-surface: var(--vscode-editorWidget-background, var(--vscode-editor-background));
     --tcs-surface-alt: var(--vscode-sideBarSectionHeader-background, var(--tcs-surface));

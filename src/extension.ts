@@ -195,9 +195,12 @@ async function showSearchPanel(context: vscode.ExtensionContext, searchScope: Se
                             message.preferredApplications,
                             message.excludedOperatingSystems
                         );
+                        // Compute repository breakdown for current results
+                        const searchRepositoryBreakdown = db.getRepositoryBreakdownForResults(results);
                         searchPanel?.webview.postMessage({
                             command: 'searchResults',
-                            results: results
+                            results: results,
+                            repositoryBreakdown: searchRepositoryBreakdown
                         });
                         break;
                     case 'searchLists':

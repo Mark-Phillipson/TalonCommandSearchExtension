@@ -671,16 +671,48 @@
 
         resultsDiv.innerHTML = '';
 
-        if (results.length === 0) {
-            resultsDiv.innerHTML = '<p class="no-results">No commands found. Try importing your Talon files first (Talon: Refresh Index)</p>';
-            return;
+
+        // Combine breakdown and result count into a single card
+        if ((displayResults.repositoryBreakdown && Object.keys(displayResults.repositoryBreakdown).length > 0) || results.length > 0) {
+            const combinedCard = document.createElement('div');
+            combinedCard.className = 'results-summary-card';
+
+            // Breakdown section
+            if (displayResults.repositoryBreakdown && Object.keys(displayResults.repositoryBreakdown).length > 0) {
+                const breakdownDiv = document.createElement('div');
+                breakdownDiv.className = 'contextual-repo-breakdown';
+                breakdownDiv.innerHTML = '<h4>Commands by Repository (current search):</h4>';
+                const repoList = document.createElement('div');
+                repoList.className = 'repo-breakdown-list';
+                const sortedRepos = Object.entries(displayResults.repositoryBreakdown).sort((a, b) => b[1] - a[1]);
+                sortedRepos.forEach(([repo, count]) => {
+                    const repoItem = document.createElement('span');
+                    repoItem.className = 'repo-breakdown-item clickable-repo';
+                    repoItem.setAttribute('data-repo', repo);
+                    repoItem.title = `Click to filter by ${repo}`;
+                    repoItem.innerHTML = `<span class=\"repo-name\">${escapeHtml(repo)}:</span> <span class=\"repo-count\">${count}</span>`;
+                    repoItem.addEventListener('click', () => filterByRepository(repo));
+                    repoList.appendChild(repoItem);
+                });
+                breakdownDiv.appendChild(repoList);
+                combinedCard.appendChild(breakdownDiv);
+            }
+
+            // Result count header
+            if (results.length > 0) {
+                const header = document.createElement('div');
+                header.className = 'results-header';
+                header.textContent = `Found ${results.length} command${results.length !== 1 ? 's' : ''}`;
+                combinedCard.appendChild(header);
+            }
+
+            resultsDiv.appendChild(combinedCard);
         }
 
-        // Add result count header
-        const header = document.createElement('div');
-        header.className = 'results-header';
-        header.textContent = `Found ${results.length} command${results.length !== 1 ? 's' : ''}`;
-        resultsDiv.appendChild(header);
+        if (results.length === 0) {
+            resultsDiv.innerHTML += '<p class="no-results">No commands found. Try importing your Talon files first (Talon: Refresh Index)</p>';
+            return;
+        }
 
         results.forEach(cmd => {
             const card = document.createElement('div');
@@ -1279,6 +1311,8 @@
             case 'searchResults':
                 console.log('[Webview] Displaying', message.results.length, 'results');
                 if (Array.isArray(message.results)) {
+                    // Attach repository breakdown to displayResults for contextual rendering
+                    displayResults.repositoryBreakdown = message.repositoryBreakdown || {};
                     displayResults(message.results);
                 } else {
                     console.error('[Webview] Invalid search results format:', message.results);

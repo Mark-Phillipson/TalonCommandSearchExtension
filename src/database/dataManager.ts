@@ -277,6 +277,18 @@ export class DataManager {
         return breakdown;
     }
 
+    /**
+     * Get repository breakdown for a given array of commands (for contextual search results)
+     */
+    public getRepositoryBreakdownForResults(results: TalonVoiceCommand[]): { [repository: string]: number } {
+        const breakdown: { [repository: string]: number } = {};
+        results.forEach(cmd => {
+            const repo = cmd.repository || 'No Repository';
+            breakdown[repo] = (breakdown[repo] || 0) + 1;
+        });
+        return breakdown;
+    }
+
     // List management methods
     public insertListItem(item: Omit<TalonListItem, 'id'>): number {
         const newItem: TalonListItem = {
