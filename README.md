@@ -285,6 +285,14 @@ npm run watch
 
 ## 🎉 What's New in This Version
 
+## 🆕 Random Command Discovery
+
+When you open the search panel, you'll now see a random selection of commands from your database (instead of filtering by a default application). This makes it easier to discover new commands and remember useful ones, even if you don't know what to search for!
+
+**The `defaultApplications` setting has been removed.**
+
+If you want to filter by application, simply use the filter dropdown in the search panel.
+
 - **UI Improvement:** The repository breakdown ("Commands by Repository") is now displayed above the search box in the Commands tab. This makes it clear that the figures shown are totals for each repository, not filtered results. When you filter or search, the breakdown remains visible for reference.
 
 - **🗣️ New Default Search Scope: Spoken Forms (Commands + Lists)**

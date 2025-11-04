@@ -1,3 +1,9 @@
+## [0.0.5] - 2025-11-04
+### Changed
+- Removed the `defaultApplications` setting from configuration and code.
+- The initial search results now show a random selection of commands, making it easier to discover and remember commands.
+### Fixed
+- No longer filters by a default application on startup; random commands are shown instead.
 # Changelog
 
 All notable changes to the Search Talon Commands extension will be documented in this file in reverse chronological order.

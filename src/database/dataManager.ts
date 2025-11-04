@@ -142,18 +142,7 @@ export class DataManager {
         if (title) {
             results = results.filter(cmd => cmd.title === title);
         }
-        const hasPreferredApps = !application && Array.isArray(preferredApplications) && preferredApplications.length > 0;
         const hasExcludedOperatingSystems = !operatingSystem && Array.isArray(excludedOperatingSystems) && excludedOperatingSystems.length > 0;
-        if (hasPreferredApps) {
-            const preferredAppSet = new Set(preferredApplications.map(app => app.toLowerCase()));
-            results = results.filter(cmd => {
-                const commandApp = (cmd.application || 'global').toLowerCase();
-                if (commandApp === 'global') {
-                    return true;
-                }
-                return preferredAppSet.has(commandApp);
-            });
-        }
         if (hasExcludedOperatingSystems) {
             const excludedOsSet = new Set(excludedOperatingSystems.map(os => os.toLowerCase()));
             results = results.filter(cmd => {
@@ -162,6 +151,16 @@ export class DataManager {
                 }
                 return !excludedOsSet.has(cmd.operatingSystem.toLowerCase());
             });
+        }
+        // If no search term and no filters, return random commands
+        const noFilters = !searchTerm && !application && !mode && !repository && !tags && !operatingSystem && !title;
+        if (noFilters) {
+            // Shuffle results and return maxResults
+            for (let i = results.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [results[i], results[j]] = [results[j], results[i]];
+            }
+            return results.slice(0, maxResults);
         }
         // Apply search term
         if (searchTerm && searchTerm.trim().length > 0) {
