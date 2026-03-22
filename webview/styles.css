@@ -57,17 +57,35 @@
     --tcs-text-subtle: var(--vscode-descriptionForeground);
 }
 
+/* Use border-box everywhere so padding doesn't create unexpected overflow */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    /* Prevent any horizontal scrolling inside the webview */
+    overflow-x: hidden;
+}
+
 body {
     font-family: var(--vscode-font-family);
     color: var(--tcs-text-strong);
     background-color: var(--vscode-editor-background);
-    padding: 20px;
+    padding: 12px 8px; /* reduced overall padding to gain horizontal space */
     margin: 0;
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
+    /* Allow the webview to use the full available width inside the editor */
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: 0 8px;
+}
+
+/* Ensure grid items can shrink (avoid being wider than the grid column) */
+#results, .command-card {
+    min-width: 0;
 }
 
 h1 {
@@ -305,8 +323,11 @@ h1 {
 /* Command results use grid layout */
 #results {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 12px;
+    /* make cards a bit narrower so more columns fit and reduce truncation */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-auto-flow: dense; /* pack items to avoid gaps and better use space */
+    gap: 8px;
+    padding-right: 8px; /* small right padding to avoid cutting off scrollbar area */
 }
 
 /* List results use block layout for compact display */
@@ -315,13 +336,20 @@ h1 {
 }
 
 /* Ensure we get approximately 3 columns on most screens */
-@media (min-width: 1000px) {
+@media (min-width: 1400px) {
+    /* larger editors can fit 4 columns comfortably */
+    #results {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 1000px) and (max-width: 1399px) {
     #results {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
-/* 2 columns on smaller screens */
+/* 2 columns on medium screens */
 @media (max-width: 999px) and (min-width: 600px) {
     #results {
         grid-template-columns: repeat(2, 1fr);
@@ -339,7 +367,7 @@ h1 {
     background: var(--tcs-surface);
     border: 1px solid var(--tcs-border-strong);
     border-radius: 6px;
-    padding: 12px;
+    padding: 10px; /* slightly reduced padding to fit more content */
     cursor: pointer;
     transition: all 0.2s;
     height: fit-content;
@@ -373,7 +401,7 @@ h1 {
 
 .command-script {
     background: var(--tcs-surface-alt);
-    padding: 8px;
+    padding: 6px;
     border-radius: 4px;
     font-family: var(--vscode-editor-font-family);
     font-size: 13px;
@@ -381,6 +409,7 @@ h1 {
     margin: 8px 0;
     overflow-x: auto;
     white-space: pre-wrap;
+    overflow-wrap: anywhere; /* allow long tokens to break instead of forcing width */
     color: var(--tcs-text-strong);
 }
 
