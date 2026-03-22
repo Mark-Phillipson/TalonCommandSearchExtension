@@ -585,7 +585,7 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri): string 
 </head>
 <body>
     <div class="container">
-        <h1>Talon Command Search</h1>
+        <h1>Talon Voice Command Search</h1>
         
         <div class="toolbar">
             <button id="checkDbBtn" class="toolbar-btn">Check Database</button>
