@@ -126,7 +126,7 @@ vsce publish 1.2.3
 ## 🚀 Step 6: Pre-Publishing Checklist
 
 ### 6.1 Code Quality
-- [x] **Compile**: Run `npm run compile` - ensure no TypeScript errors
+- [x] **Compile**: Run ` split` - ensure no TypeScript errors
 - [x] **Test**: Verify extension works in development mode (F5)
 - [x] **Clean**: Remove any debug console.log statements
 
